@@ -1,0 +1,58 @@
+#!/usr/bin/env sh
+
+# Pre-build environment configuration and checks
+src_env ()
+{
+        return 0
+}
+
+# Prepare stow package and do any necessary patching or fixes
+src_prepare ()
+{
+        return 0
+}
+
+# Configure and build the stow package
+src_build ()
+{
+        return 0
+}
+
+# Run pre-install test scripts
+src_check ()
+{
+        return 0
+}
+
+# Install the stow package
+src_install ()
+{
+        return 0
+}
+
+# Called before stow package is stowed
+stow_prae ()
+{
+
+        return 0
+}
+
+# Called after stow package is stowed
+stow_post ()
+{
+        return 0
+}
+
+# Called before stow package is unstowed
+unstow_prae ()
+{
+        return 0
+}
+
+# Called after stow package is unstowed
+unstow_post ()
+{
+        return 0
+}
+
+# vim: set ft=sh ts=8 sw=8 tw=0 et :

@@ -1,0 +1,87 @@
+#!/usr/bin/env sh
+
+set -e
+set -u
+
+# TODO
+#trap 'p=$? ; command rm -f .lock ; exit $p' 1 2 3 6 9 15 EXIT
+# if
+#         exec 9<"$0";
+#         ! command flock -n 9
+# then
+#         printf '%s\n' "src: Sorry, I am already running" 1>&2;
+#         exit 1
+# fi
+
+_a= \
+myAction= \
+myArgs= \
+myCheckout= \
+myKeyRing= \
+myLog= \
+myMirror= \
+myMrAction= \
+myPkgList= \
+myRoot= \
+mySrcList=;
+
+myRoot="$(
+        rl="$(command readlink -fn -- "$0")";
+        command dirname -- "$rl"
+)"
+myRoot="${myRoot%/bin}"
+
+readonly \
+        myCheckout="${myRoot}/var/checkout" \
+        myKeyRing="${myRoot}/var/ring" \
+        myLog="${myRoot}/var/log" \
+        myMirror="${myRoot}/var/mirror" \
+        myRoot;
+
+readonly \
+        myPkgList="${myMirror%/*}/pkg.list" \
+        mySrcList="${myMirror%/*}/mirror.list";
+
+export \
+        myCheckout \
+        myKeyRing \
+        myLog \
+        myMirror \
+        myPkgList \
+        myRoot \
+        mySrcList;
+
+. "${myRoot}/lib/setup.sh"
+
+msg "latch/main: myRoot -> ${myRoot}"
+msg "latch/main: myKeyRing -> ${myKeyRing}"
+msg "latch/main: myMirror -> ${myMirror}"
+msg "latch/main: myLog -> ${myLog}"
+msg "latch/main: myCheckout -> ${myCheckout}"
+
+for _a
+do
+        case "$_a" in
+        forge|mr|pkg|rehash)
+                readonly myAction="$_a"
+                msg "latch/main: myAction -> ${myAction}"
+                shift 1
+        ;;
+        *)
+                myArgs="${myArgs:+${myArgs} }'${_a}'"
+                shift 1
+        esac
+done
+
+msg "latch/main: myArgs -> ${myArgs={\}}"
+readonly myArgs
+
+command mkdir -p \
+        "$myCheckout" \
+        "$myKeyRing" \
+        "$myLog" \
+        "$myMirror";
+
+action "$myAction"
+
+# vim: set ft=sh ts=8 sw=8 tw=0 et :

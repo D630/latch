@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+
+cd /home/src
+
+if
+        ! test -e "mr/src.db" ||
+        test "ACCESSED" -nt "mr/src.db"
+then
+        echo "src-list: src.db outdated" 1>&2;
+        echo "src-list: Updating src.db ..." 1>&2;
+        ./scripts/src-list.awk > mr/src.db;
+fi
+
+command sort "mr/src.db" \
+| command column -s '|' -t;
+
+# vim: set ts=8 sw=8 tw=0 et :

@@ -1,0 +1,23 @@
+#!/usr/bin/awk -f
+
+BEGIN {
+        FS = " ";
+        RS = "\n";
+        SUBSEP = "\034";
+        split("", _Mirrors);
+        split("", _Vcs);
+
+        _Vcs["git"]++;
+
+        _Mirrors[ \
+                "- name:            DEFAULT",
+                "  git_mirror:      die disabled",
+                "  git_wclone:      git_worktree_clone",
+                "  git_wpurge:      git_worktree_purge",
+                "  git_wrebase:     git_worktree_update rebase",
+                "  git_wreset:      git_worktree_update reset",
+                "  git_wupdate:     git_worktree_update" \
+        ]++
+}
+
+# vim: set ts=8 sw=8 tw=0 et :

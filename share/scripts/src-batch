@@ -1,0 +1,47 @@
+#!/usr/bin/env sh
+
+set -e
+
+case "$1" in
+chop|info|init|install|purge|remove|stow|unstow)
+        action="$1"
+        shift 1
+;;
+*)
+        echo "noop" 1>&2;
+        exit 1
+esac
+
+expr=""
+
+for _e in "$1" "$2"
+do
+        case "$_e" in
+        local)
+                readonly expr="-e local"
+        ;;
+        global)
+                expr="${expr} -e global"
+        ;;
+        system)
+
+                expr="${expr} -e system"
+        esac
+done
+
+: ${expr:? context missing}
+
+cd -- "/home/src/mr"
+
+find . -type f -name "SCONTEXT" -exec grep -F -l -x ${expr} "{}" + \
+| sed -e "s|./||;s|/SCONTEXT$||" \
+| {
+        while
+                IFS= read -r source
+        do
+                ../src "$action" "$source" 2>&1 \
+                | tee "${source}/LOG";
+        done
+};
+
+# vim: set ts=8 sw=8 tw=0 et :
