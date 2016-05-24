@@ -3,15 +3,14 @@
 set -e
 set -u
 
-# TODO
 #trap 'p=$? ; command rm -f .lock ; exit $p' 1 2 3 6 9 15 EXIT
-# if
-#         exec 9<"$0";
-#         ! command flock -n 9
-# then
-#         printf '%s\n' "src: Sorry, I am already running" 1>&2;
-#         exit 1
-# fi
+if
+         exec 9<"$0";
+         ! command flock -n 9
+then
+         printf '%s\n' "latch/error: Sorry, I am already running" 1>&2;
+         exit 1
+fi
 
 _a= \
 myAction= \

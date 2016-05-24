@@ -39,7 +39,11 @@ pconfigure ()
                 die "latch/pkg/pconfigure/error: STOW_TARGET -? ${STOW_TARGET}"
         fi
 
-        PKG_NAME="$KEY_NAME" \
+        PKG_NAME="$(
+                command sed -e 's|/|::|g' <<IN
+${KEY_NAME}
+IN
+        )"
         PKG_VERSION="${DISTDIR_DESC}/${KEY_DESC}" \
         DESTDIR="${STOW_DIR}/${PKG_NAME}"
 
@@ -257,7 +261,7 @@ pregister ()
         ;;
         stow)
                 command ed -s "$myPkgList" <<S
-1,$s /^$(echo "\(${PKG_NAME}|${DISTDIR_DESC}|${KEY_DESC}|${myContext}|\)0" | command sed -e 's|/|\\/|g')$/\11/
+1,\$ s/^$(echo "\(${PKG_NAME}|${DISTDIR_DESC}|${KEY_DESC}|${myContext}|\)0" | command sed -e 's|/|\\/|g')\$/\11/
 w
 S
         ;;
@@ -340,13 +344,13 @@ punregister ()
         case "$1" in
         pkg)
                 command ed -s "$myPkgList" <<S
-g/^$(echo "${PKG_NAME}|${DISTDIR_DESC}|${KEY_DESC}|${myContext}|0" | command sed -e 's|/|\\/|g')$/d
+g/^$(echo "${PKG_NAME}|${DISTDIR_DESC}|${KEY_DESC}|${myContext}|0" | command sed -e 's|/|\\/|g')\$/d
 w
 S
         ;;
         stow)
                 command ed -s "$myPkgList" <<S
-1,$s /^$(echo "\(${PKG_NAME}|[^|]*|[^|]*|${myContext}|\)1" | command sed -e 's|/|\\/|g')$/\10/
+1,\$ s/^$(echo "\(${PKG_NAME}|[^|]*|[^|]*|${myContext}|\)1" | command sed -e 's|/|\\/|g')$/\10/
 w
 S
         ;;
