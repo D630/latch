@@ -1,5 +1,32 @@
 #!/usr/bin/env sh
 
+pchop ()
+{
+        local _b
+
+        cd -- "$DESTDIR"
+
+        export \
+                GIT_DIR="${DESTDIR}/.git" \
+                GIT_WORK_TREE="$DESTDIR";
+
+        command grep -e "${PKG_NAME}|[^|]*|[^|]*|${myContext}|0" "$myPkgList" \
+        | {
+                while
+                        IFS='|' read -r _ p k _ _ || :;
+                do
+                        msg "latch/pkg/pchop: Deleting '${p}/${k}' ..."
+                        gbranch "delete" "${p}/${k}"
+                done;
+                punregister "chop-pkg"
+        };
+
+        msg "latch/pkg/pchop: Checking out '${stowedIs}' ..."
+        gcheckout "$stowedIs"
+
+        msg "latch/pkg/pchop: DONE"
+}
+
 pconfigure ()
 {
         if
@@ -232,19 +259,31 @@ plimit ()
                 _l=" ${_l} info "
         fi
 
-        msg "latch/pkg/plimit: {${_l:-' ? '}}"
+        msg "latch/pkg/plimit: {${_l:-''}}"
 
         case "$_l" in
         *" ${myPkgAction} "*)
                 if
-                        [ "$myPkgAction" = "stow" -a "$stowedIs" != "<>" ]
+                        [ "$stowedIs" != "<>" ]
                 then
-                        die "latch/pkg/plimit/error: Current version must be unstowed: '${stowedIs}'"
+                        case "$myPkgAction" in
+                        purge|stow)
+                                die "latch/pkg/plimit/error: Current version must be unstowed: '${stowedIs}'"
+                        esac
                 fi
         ;;
         *)
-                die "latch/pkg/plimit/error: damn, myPkgAction cannot be executed"
+                die "latch/pkg/plimit/error: damn, myPkgAction cannot be executed: '${myPkgAction}'"
         esac
+}
+
+ppurge ()
+{
+        msg "latch/pkg/ppurge: Deinitializing '${PKG_VERSION}' ..."
+        pdeinit
+        msg "latch/pkg/ppurge: Unregistering all pkgs ..."
+        punregister any-pkg
+        msg "latch/pkg/ppurge: DONE"
 }
 
 pregister ()
@@ -278,7 +317,7 @@ premove ()
                 GIT_DIR="${DESTDIR}/.git" \
                 GIT_WORK_TREE="$DESTDIR";
 
-        msg "latch/pkg/premove: Deleting pkg version ${PKG_VERSION} ..."
+        msg "latch/pkg/premove: Deleting pkg version '${PKG_VERSION}' ..."
         gbranch "delete" "$PKG_VERSION"
 
         msg "latch/pkg/premove: Cleaning ..."
@@ -342,6 +381,18 @@ pstow ()
 punregister ()
 {
         case "$1" in
+        any-pkg)
+                command ed -s "$myPkgList" <<S
+g/^"${PKG_NAME}|[^|]*|[^|]*|${myContext}|[01]"\$/d
+w
+S
+        ;;
+        chop-pkg)
+                command ed -s "$myPkgList" <<S
+g/^"${PKG_NAME}|[^|]*|[^|]*|${myContext}|0"\$/d
+w
+S
+        ;;
         pkg)
                 command ed -s "$myPkgList" <<S
 g/^$(echo "${PKG_NAME}|${DISTDIR_DESC}|${KEY_DESC}|${myContext}|0" | command sed -e 's|/|\\/|g')\$/d

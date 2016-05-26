@@ -104,6 +104,9 @@ pkg_action ()
         plimit
 
         case "$myPkgAction" in
+        chop)
+                pchop
+        ;;
         info)
                 :
         ;;
@@ -112,6 +115,9 @@ pkg_action ()
         ;;
         install)
                 pinstall
+        ;;
+        purge)
+                ppurge
         ;;
         remove)
                 premove
