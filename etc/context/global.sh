@@ -2,7 +2,7 @@
 
 global_context ()
 {
-        myUid="0"
+        useId="0"
         STOW_DIR="/usr/local/stow"
         STOW_TARGET="/usr/local"
         myXstowConfig="${myRoot}/etc/xstow/global.ini"

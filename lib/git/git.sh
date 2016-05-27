@@ -110,4 +110,13 @@ remove)
         die "latch/gremote/error: unknown argument -? ${1}"
 esac
 
+greset ()
+case "$1" in
+hard)
+        command git reset --hard
+;;
+*)
+        die "latch/greset/error: unknown argument -? ${1}"
+esac
+
 # vim: set ts=8 sw=8 tw=0 et :

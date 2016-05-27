@@ -21,18 +21,22 @@ pkg_action ()
         PKG_VERSION= \
         STOW_DIR= \
         STOW_TARGET= \
+        _g= \
+        _i= \
         arePacked=0 \
         currentBranch="<>" \
+        currentId= \
         isInitialized="false" \
         isPacked="false" \
         isStowed="false" \
         myContext= \
         myHostname= \
+        myIds= \
         myPkgAction= \
-        myUid= \
         myUser= \
         myXstowConfig= \
-        stowedIs="<>";
+        stowedIs="<>" \
+        useId=;
 
         import git pkg
 
@@ -43,12 +47,21 @@ pkg_action ()
 
         msg "latch/pkg: myPkgList -> ${myPkgList}"
 
+        currentId="$(command id -u)"
+        msg "latch/pkg: currentId -> ${currentId}"
         myHostname="$(command hostname -s)"
         msg "latch/pkg: myHostname -> ${myHostname}"
-        readonly myHostname
+        readonly \
+                currentId \
+                myHostname;
 
         . "${myRoot}/etc/env/${myHostname}.sh"
         msg "latch/pkg: myUser -> ${myUser}"
+        msg "latch/pkg: myIds -> ${myIds}"
+        IFS=':' read -r _i _g <<IN
+${myIds}
+IN
+        [ -n "$_i" -a -n "$_g" ] || die "latch/pkg/error: myIds -? '${myIds}'";
 
         msg "latch/pkg: KEY_NAME -> ${KEY_NAME:=$1}"
 
@@ -62,6 +75,7 @@ pkg_action ()
                 if
                         gcheckout "${3:-$KEY_NAME}" 1>/dev/null 2>&1;
                 then
+                        command chown "$myIds" "./.git/HEAD" "./.git/index" "./"*
                         gget "description" 2>/dev/null;
                 else
                         msg "latch/pkg/error: could not check out: '${3:-$KEY_NAME}'"
@@ -81,11 +95,12 @@ pkg_action ()
                         GIT_WORK_TREE="$DISTDIR";
 
                 if
-                        gcheckout "${2:-master}" 1>/dev/null 2>&1;
+                        gcheckout "${2:-HEAD}" 1>/dev/null 2>&1;
                 then
+                        command chown -R "$myIds" "./.git/HEAD" "./.git/index"
                         gget "description" 2>/dev/null;
                 else
-                        msg "latch/pkg/error: could not check out: '${2:-master}'"
+                        msg "latch/pkg/error: could not check out: '${2:-HEAD}'"
                         die "latch/pkg/error: DISTDIR not checked out by 'mr wupdate'? '${DISTDIR}'"
                 fi
         )"
@@ -97,6 +112,7 @@ pkg_action ()
                 KEY_DESC \
                 KEY_NAME \
                 myPkgAction \
+                myIds \
                 myUser;
 
         pconfigure

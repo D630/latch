@@ -40,7 +40,8 @@ pconfigure ()
 
         context "$myContext"
 
-        msg "latch/pkg/pconfigure: myUid -> ${myUid}"
+        msg "latch/pkg/pconfigure: useId -> ${useId}"
+        [ "$currentId" -eq "$useId" ] || die "latch/pkg/pconfigure/error: currentId does not match useId: '${currentId} != ${useId}'";
 
         if
                 test -r "$myXstowConfig"
@@ -114,7 +115,7 @@ IN
         )"
 
         if
-                test -r "$myPkgList"
+                test -e "$myPkgList"
         then
                 stowedIs="$(
                         command grep -e "^${PKG_NAME}|${DISTDIR_DESC}|${KEY_DESC}|${myContext}|1$" "$myPkgList" \
@@ -146,9 +147,9 @@ IN
                 isInitialized \
                 isPacked \
                 isStowed \
-                myUid \
                 myXstowConfig \
-                stowedIs;
+                stowedIs \
+                useId;
 }
 
 pdeinit ()
@@ -187,16 +188,27 @@ pinstall ()
 
         cd -- "$DISTDIR"
 
-        msg "latch/pkg/pinstall: Invoking src_env() ..."
-        src_env
-        msg "latch/pkg/pinstall: Invoking src_prepare() ..."
-        ( src_prepare )
-        msg "latch/pkg/pinstall: Invoking src_build() ..."
-        ( src_build )
-        msg "latch/pkg/pinstall: Invoking src_check() ..."
-        ( src_check )
-        msg "latch/pkg/pinstall: Invoking src_install() ..."
-        ( src_install )
+        (
+                msg "latch/pkg/pinstall: Invoking src_env() ..."
+                src_env
+                msg "latch/pkg/pinstall: Invoking src_prepare() ..."
+                ( src_prepare )
+                msg "latch/pkg/pinstall: Invoking src_build() ..."
+                ( src_build )
+                msg "latch/pkg/pinstall: Invoking src_check() ..."
+                ( src_check )
+                msg "latch/pkg/pinstall: Invoking src_install() ..."
+                ( src_install )
+        )
+
+        # TODO
+        gclean
+        greset "hard"
+        command chown -R "$myIds" \
+                "./.git/HEAD" \
+                "./.git/ORIG_HEAD" \
+                "./.git/index" \
+                "./"*;
 
         cd -- "$DESTDIR"
 
@@ -223,11 +235,28 @@ pinstall ()
         chmod -R 755 "$DESTDIR"
 }
 
+__plimit ()
+{
+        if
+                [ "$arePacked" -gt 1 ]
+        then
+                _l="${_l} chop"
+        else
+                :
+        fi
+}
+
 _plimit ()
 if
-        [ "$stowedIs" != "<>" -a "$arePacked" -gt 1 ]
+        [ "$stowedIs" != "<>" ]
 then
-        _l="${_l} chop"
+        case "$myPkgAction" in
+        purge|stow)
+                die "latch/pkg/plimit/error: Current version must be unstowed: '${stowedIs}'"
+        esac
+        __plimit
+else
+        :
 fi
 
 plimit ()
@@ -235,10 +264,10 @@ plimit ()
         local _l
 
         case "${isInitialized}::${isPacked}::${isStowed}" in
-        false::false::false)
+        false::*)
                 _l="init"
         ;;
-        true::false::false)
+        true::false::*)
                 _l="install purge"
                 _plimit
         ;;
@@ -247,8 +276,8 @@ plimit ()
                 _plimit
         ;;
         true::true::true)
-                _l="purge remove unstow"
-                _plimit
+                _l="purge unstow"
+                __plimit
         esac
 
         if
@@ -259,18 +288,11 @@ plimit ()
                 _l=" ${_l} info "
         fi
 
-        msg "latch/pkg/plimit: {${_l:-''}}"
+        msg "latch/pkg/plimit: {${_l}}"
 
         case "$_l" in
         *" ${myPkgAction} "*)
-                if
-                        [ "$stowedIs" != "<>" ]
-                then
-                        case "$myPkgAction" in
-                        purge|stow)
-                                die "latch/pkg/plimit/error: Current version must be unstowed: '${stowedIs}'"
-                        esac
-                fi
+                :
         ;;
         *)
                 die "latch/pkg/plimit/error: damn, myPkgAction cannot be executed: '${myPkgAction}'"
@@ -307,6 +329,8 @@ S
         *)
                 die "latch/pkg/pregister/error: unknown argument -? ${1}"
         esac
+
+        command chown "$myIds" "$myPkgList"
 }
 
 premove ()
@@ -408,6 +432,8 @@ S
         *)
                 die "latch/pkg/punregister/error: unknown argument -? ${1}"
         esac
+
+        command chown "$myIds" "$myPkgList"
 }
 
 punstow ()
