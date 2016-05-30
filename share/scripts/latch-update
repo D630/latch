@@ -1,0 +1,106 @@
+#!/usr/bin/env sh
+
+set -e
+
+test "$(id -u)" -eq 0 || {
+        echo "latch-update/error: need to be super user" 1>&2;
+        exit 1
+}
+
+cd /home/latch
+
+rm -f -- var/TUPDATES var/FUPDATES
+
+user=user1
+
+su -m ${user} ./bin/latch mr mirror || :;
+su -m ${user} ./bin/latch mr wupdate || :;
+
+if
+        test -e var/UPDATES
+then
+        test "$(stat -c %s "var/UPDATES" 2>/dev/null)" -lt 2 && {
+                echo "latch-update/error: var/UPDATES is empty" 1>&2;
+                exit 1
+        }
+else
+        echo "latch-update: No worktree updates available at all" 1>&2;
+        exit 0
+fi
+
+while
+        IFS= read -r p
+do
+        error=0
+
+        pp=$(
+                sed -e 's|/|::|g' <<IN
+${p}
+IN
+        )
+
+        context=$(
+                grep -e "^${pp}|[^|]*|[^|]*|[^|]*|1$" var/pkg.list \
+                | {
+                        IFS='|' read -r _ _ _ c _ || :;
+                        echo "$c"
+                }
+        )
+
+        case "$context" in
+        local)
+                sudo="su -m ${user}"
+        ;;
+        global|system)
+                sudo=
+        ;;
+        *)
+                echo "latch-update/error: no context found" 1>&2;
+                exit 1
+        esac
+
+        #${sudo} ./bin/latch pkg init "$p" || :;
+
+        for _a in install unstow-curr stow
+        do
+                ${sudo} ./bin/latch pkg "$_a" "$p" || error=1;
+        done
+
+        if
+                test "$error" -eq 0
+        then
+                ed -s var/UPDATES <<S
+g/^$(echo "$p" | sed -e 's|/|\\/|g')\$/d
+w
+S
+                echo "$pp" >> var/TUPDATES
+                ${sudo} ./bin/latch pkg chop "$p" || :;
+        else
+                echo "$p" >> var/FUPDATES;
+        fi
+done < var/UPDATES
+
+chmod 777 var/UPDATES var/TUPDATES var/FUPDATES 2>/dev/null || :;
+
+if
+        tty 1>/dev/null 2>&1
+then
+        p=less
+else
+        p=cat
+fi
+
+{
+        test -e var/TUPDATES && {
+                echo "latch-update: new updates set up:"
+                ./share/scripts/latch-list \
+                | grep -F -f var/NUPDATES;
+        }
+
+        test -e var/FUPDATES && {
+                echo "latch-update/error: at least one update failed:"
+                cat var/FUPDATES
+        }
+} | "$p";
+
+# vim: set ts=8 sw=8 tw=0 et :

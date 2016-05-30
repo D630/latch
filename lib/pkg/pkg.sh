@@ -10,10 +10,10 @@ pchop ()
                 GIT_DIR="${DESTDIR}/.git" \
                 GIT_WORK_TREE="$DESTDIR";
 
-        command grep -e "${PKG_NAME}|[^|]*|[^|]*|${myContext}|0" "$myPkgList" \
+        command grep -e "^${PKG_NAME}|[^|]*|[^|]*|${myContext}|0$" "$myPkgList" \
         | {
                 while
-                        IFS='|' read -r _ p k _ _ || :;
+                        IFS='|' read -r _ p k _ _;
                 do
                         msg "latch/pkg/pchop: Deleting '${p}/${k}' ..."
                         gbranch "delete" "${p}/${k}"
@@ -30,7 +30,7 @@ pchop ()
 pconfigure ()
 {
         if
-                IFS='|' read -r _ _ myContext < "${myKeyRing}/LINFO" || :;
+                IFS='|' read -r _ _ myContext < "${myKeyRing}/LINFO"
         then
                 msg "latch/pkg/pconfigure: myContext -> ${myContext}"
         else
@@ -409,13 +409,13 @@ punregister ()
         case "$1" in
         any-pkg)
                 command ed -s "$myPkgList" <<S
-g/^"${PKG_NAME}|[^|]*|[^|]*|${myContext}|[01]"\$/d
+g/^${PKG_NAME}|[^|]*|[^|]*|${myContext}|[01]\$/d
 w
 S
         ;;
         chop-pkg)
                 command ed -s "$myPkgList" <<S
-g/^"${PKG_NAME}|[^|]*|[^|]*|${myContext}|0"\$/d
+g/^${PKG_NAME}|[^|]*|[^|]*|${myContext}|0\$/d
 w
 S
         ;;

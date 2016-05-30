@@ -41,6 +41,7 @@ git_worktree_update ()
         then
                 cd ..
                 if
+                        command git checkout -f master
                         worktree_fetch
                         worktree_check
                 then

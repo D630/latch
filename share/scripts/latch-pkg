@@ -1,0 +1,50 @@
+#!/usr/bin/env sh
+
+set -e
+
+case "$1" in
+chop|info|init|install|purge|remove|stow|unstow|unstow-curr)
+        action="$1"
+        shift 1
+;;
+*)
+        echo "noop" 1>&2;
+        exit 1
+esac
+
+expr=""
+
+for _e in "$1" "${2:-_}"
+do
+        case "$_e" in
+        local)
+                readonly expr="-e |local"
+        ;;
+        global)
+                expr="${expr} -e |global"
+        ;;
+        system)
+
+                expr="${expr} -e |system"
+        esac
+done
+
+: ${expr:? context missing}
+
+cd -- "/home/latch/var/ring"
+GIT_DIR="./.git" \
+GIT_WORK_TREE="$PWD" \
+        git checkout master 1>/dev/null 2>&1
+
+grep -F ${expr} "./LINFO" \
+| sed -e 's#|.*$##' \
+| {
+        set +e
+        while
+                IFS= read -r n
+        do
+                ../../bin/latch pkg "$action" "$n"
+        done
+};
+
+# vim: set ts=8 sw=8 tw=0 et :

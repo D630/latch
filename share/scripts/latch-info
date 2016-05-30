@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+cd /home/latch
+
+./bin/latch pkg info "$1" 2>&1 \
+| column -t;
+
+# vim: set ts=8 sw=8 tw=0 et :

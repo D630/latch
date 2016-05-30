@@ -41,6 +41,28 @@ pkg_action ()
         import git pkg
 
         eval set -- "$myArgs"
+
+        # TODO
+        if
+                [ "$1" = "unstow-curr" ]
+        then
+                shift 1
+                local _p
+                _p="$(
+                        __p="$(
+                                command sed -e 's|/|::|g' <<S
+${1}
+S
+                        )";
+                        command grep -e "^${__p}|[^|]*|[^|]*|[^|]*|1\$" "$myPkgList" \
+                        | {
+                                IFS='|' read -r _ d k _ _ || :;
+                                echo "${d:-_}" "${k:-_}"
+                        };
+                )"
+                eval set -- "unstow" "$1" "$_p"
+        fi
+
         readonly myPkgAction="$1"
         shift 1
         msg "latch/pkg: myPkgAction -> ${myPkgAction}"
@@ -95,12 +117,12 @@ IN
                         GIT_WORK_TREE="$DISTDIR";
 
                 if
-                        gcheckout "${2:-HEAD}" 1>/dev/null 2>&1;
+                        gcheckout "${2:-master}" 1>/dev/null 2>&1;
                 then
                         command chown -R "$myIds" "./.git/HEAD" "./.git/index"
                         gget "description" 2>/dev/null;
                 else
-                        msg "latch/pkg/error: could not check out: '${2:-HEAD}'"
+                        msg "latch/pkg/error: could not check out: '${2:-master}'"
                         die "latch/pkg/error: DISTDIR not checked out by 'mr wupdate'? '${DISTDIR}'"
                 fi
         )"

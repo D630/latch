@@ -1,0 +1,7 @@
+#!/usr/bin/env sh
+
+/home/latch/share/scripts/latch-list.awk \
+| sort \
+| command column -s '|' -t;
+
+# vim: set ts=8 sw=8 tw=0 et :
