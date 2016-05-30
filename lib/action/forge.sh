@@ -13,6 +13,10 @@ forge_action ()
 
         cd -- "$myKeyRing"
 
+        export \
+                GIT_DIR="${myKeyRing}/.git" \
+                GIT_WORK_TREE="$myKeyRing";
+
         case "$c" in
         {})
                 die "latch/forge/error: unknown argument -? '${c}'"

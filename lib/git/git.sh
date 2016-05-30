@@ -31,6 +31,13 @@ isBranch)
                 "refs/heads/${2}" \
         2>/dev/null;
 ;;
+isChanged)
+        command git diff \
+                --exit-code \
+                --name-only \
+                --quiet \
+                -- "$2";
+;;
 isRemote)
         command git remote get-url "$2" 1>/dev/null 2>&1;
 ;;
@@ -93,8 +100,8 @@ esac
 ginit ()
 {
         command git init
-        command git config --local user.name "d630"
-        command git config --local user.email "d630@posteo.net"
+        command git config --local user.name "latch"
+        command git config --local user.email "latch@example.org"
         command git commit --allow-empty -m "${1:-init}"
 }
 

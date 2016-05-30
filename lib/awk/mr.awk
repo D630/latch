@@ -110,12 +110,12 @@ function selectRepos(       a, m, _v, v) {
 
 BEGIN {
         if (isEmptyArr(_Vcs)) {
-                msg("latch/awk/error: src.list is not valid");
+                msg("latch/awk/error: mirror.list is not valid");
                 die("latch/awk/error: _Vcs array is empty")
         };
 
         if (isEmptyArr(_Mirrors)) {
-                msg("latch/awk/error: src.list is not valid");
+                msg("latch/awk/error: mirror.list is not valid");
                 die("latch/awk/error: _Mirrors array is empty")
         };
 

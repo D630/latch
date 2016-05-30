@@ -204,11 +204,13 @@ pinstall ()
         # TODO
         gclean
         greset "hard"
-        command chown -R "$myIds" \
-                "./.git/HEAD" \
-                "./.git/ORIG_HEAD" \
-                "./.git/index" \
-                "./"*;
+        [ "$myContext" = "local" ] || {
+                command chown -R "$myIds" \
+                        "./.git/HEAD" \
+                        "./.git/ORIG_HEAD" \
+                        "./.git/index" \
+                        "./"*;
+        };
 
         cd -- "$DESTDIR"
 
@@ -232,7 +234,7 @@ pinstall ()
         msg "latch/pkg/pinstall: DONE"
 
         # TODO
-        chmod -R 755 "$DESTDIR"
+        command chmod -R 755 "${DESTDIR}"/?*
 }
 
 __plimit ()

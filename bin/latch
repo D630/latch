@@ -19,10 +19,10 @@ myCheckout= \
 myKeyRing= \
 myLog= \
 myMirror= \
+myMirrorList= \
 myMrAction= \
 myPkgList= \
-myRoot= \
-mySrcList=;
+myRoot=;
 
 myRoot="$(
         rl="$(command readlink -fn -- "$0")";
@@ -35,20 +35,18 @@ readonly \
         myKeyRing="${myRoot}/var/ring" \
         myLog="${myRoot}/var/log" \
         myMirror="${myRoot}/var/mirror" \
+        myMirrorList="${myRoot}/var/mirror.list" \
+        myPkgList="${myRoot}/var/pkg.list" \
         myRoot;
-
-readonly \
-        myPkgList="${myMirror%/*}/pkg.list" \
-        mySrcList="${myMirror%/*}/mirror.list";
 
 export \
         myCheckout \
         myKeyRing \
         myLog \
         myMirror \
+        myMirrorList \
         myPkgList \
-        myRoot \
-        mySrcList;
+        myRoot;
 
 . "${myRoot}/lib/setup.sh"
 
@@ -72,7 +70,8 @@ do
         esac
 done
 
-msg "latch/main: myArgs -> ${myArgs={\}}"
+: "${myArgs:={\}}"
+msg "latch/main: myArgs -> ${myArgs}"
 readonly myArgs
 
 command mkdir -p \

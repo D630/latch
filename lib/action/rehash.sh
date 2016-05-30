@@ -3,7 +3,7 @@
 rehash_action ()
 (
         bin= \
-        myLRemote="${myKeyRing}/LREMOTE";
+        myLInfo="${myKeyRing}/LINFO";
 
         import git
 
@@ -12,27 +12,27 @@ rehash_action ()
                 cd ..
 
                 if
-                        ! test -r "$mySrcList"
+                        ! test -e "$myMirrorList"
                 then
-                        skel "src" .
+                        skel "mirror" .
                 fi
 
-                command cp -f -- "$mySrcList" "${mySrcList}~"
-                msg "latch/rehash: mySrcList -> ${mySrcList}"
+                command cp -f -- "$myMirrorList" "${myMirrorList}~"
+                msg "latch/rehash: myMirrorList -> ${myMirrorList}"
         )
 
         export \
                 GIT_DIR="${myKeyRing}/.git" \
                 GIT_WORK_TREE="$myKeyRing";
 
-        gcheckout "master"
+        gcheckout "master" 1>/dev/null 2>&1
 
         if
-                ! test -e "$myLRemote"
+                ! test -e "$myLInfo"
         then
-                printf '%s' "" > "$myLRemote";
+                printf '%s' "" > "$myLInfo";
         fi
-        export myLRemote
+        export myLInfo
 
         if
                 command -v "mawk" 1>/dev/null 2>&1;
@@ -43,7 +43,7 @@ rehash_action ()
         fi
 
         command "$bin" \
-                -f "${mySrcList}" \
+                -f "${myMirrorList}" \
                 -f "${myRoot}/lib/awk/common.awk" \
                 -f "${myRoot}/lib/awk/rehash.awk";
 

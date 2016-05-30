@@ -2,8 +2,7 @@
 
 _fadd ()
 {
-        printf "'%s/m' '%s'\n" "$b" "${b}.git"
-        printf "'%s/u' '%s'\n" "$b" "$u"
+        printf '%s|%s|%s\n' "$b" "$u" "$c"
 }
 
 fadd ()
@@ -11,7 +10,9 @@ fadd ()
         local \
                 _r \
                 u="${1%.git}" \
-                b="${2%/}";
+                b="${2%/}" \
+                c="${3:-'<>'}";
+
         b="${b#/}"
         u="${u}.git"
 
@@ -48,11 +49,12 @@ fadd ()
                 gbranch "add" "$b" "hammer latchkey ${b}"
                 msg "latch/forge/fadd: Forging latchkey '${b}' ..."
                 skel "latchkey"
-                _fadd > LREMOTE;
+                _fadd > ./LINFO;
                 gcommit "forge latchkey ${b}"
                 msg "latch/forge/fadd: Forging latchkey ring ..."
                 gcheckout "master"
-                _fadd >> LREMOTE;
+                _fadd >> ./LINFO;
+                command sort -u -o ./LINFO ./LINFO
                 gcommit "forge latchkey ring"
         fi
 }
@@ -65,13 +67,40 @@ fcommit ()
                 die "latch/forge/fcommit/error: latchkey ring not forged"
         fi
 
-        local b
+        local \
+                _b \
+                _c \
+                _u \
+                b;
+
         b="$(gget "currentBranch")"
 
-        [ "$b" = "master" ] && b="latchkey ring";
-
-        msg "latch/forge/fcommit: Forging latchkey '${b}' ..."
-        gcommit "forge latchkey ${b}" || :;
+        if
+                [ "$b" = "master" ]
+        then
+                msg "latch/forge/fcommit: Forging latchkey ring ..."
+                gcommit "forge latchkey ring" || :;
+        else
+                if
+                        gcheck "isChanged" "./LINFO"
+                then
+                        msg "latch/forge/fcommit: Forging latchkey '${b}' ..."
+                        gcommit "forge latchkey '${b}'" || :;
+                else
+                        IFS='|' read -r _b _u _c < "./LINFO" || :;
+                        msg "latch/forge/fcommit: Forging latchkey '${b}' ..."
+                        gcommit "forge latchkey '${b}'" || :;
+                        gcheckout "master"
+                        command ed -s "./LINFO" <<S
+1,\$ s/^$(echo "${b}|[^|]*|[^|]*" | command sed -e 's|/|\\/|g')\$/$(echo "${_b}|${_u}|${_c}" | command sed -e 's|/|\\/|g')/
+w
+S
+                        msg "latch/forge/fcommit: Forging latchkey ring ..."
+                        gcommit "forge latchkey ring" || :;
+                        msg "latch/forge/fcommit: Switching back ..."
+                        gcheckout "$b"
+                fi
+        fi
 }
 
 fremove () {
@@ -95,8 +124,8 @@ fremove () {
                 msg "latch/forge/fremove: Destroying latchkey '${b}' ..."
                 gbranch "delete" "$b"
                 msg "latch/forge/fremove: Forging latchkey ring ..."
-                command ed -s "./LREMOTE" <<S
-g/^$(echo "'${b}/[mu]' " | command sed -e 's|/|\\/|g')/d
+                command ed -s "./LINFO" <<S
+g/^$(echo "${b}|[^|]*|[^|]*" | command sed -e 's|/|\\/|g')\$/d
 w
 S
                 gcommit "forge latchkey ring"
@@ -114,7 +143,7 @@ else
         msg "latch/forge/fring: Hammering latchkey ring ..."
         ginit "hammer latchkey ring"
         msg "latch/forge/fring: Forging latchkey ring ..."
-        printf '%s' "" > LREMOTE;
+        printf '%s' "" > LINFO;
         gcommit "forge latchkey ring"
 fi
 

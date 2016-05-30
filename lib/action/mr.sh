@@ -21,12 +21,12 @@ mr_action ()
         cd -- "${myMirror%/*}"
 
         if
-                ! test -r "$mySrcList"
+                ! test -e "$myMirrorList"
         then
-                skel "src" .
+                skel "mirror" .
         fi
-        command cp -f -- "$mySrcList" "${mySrcList}~"
-        msg "latch/mr: mySrcList -> ${mySrcList}"
+        command cp -f -- "$myMirrorList" "${myMirrorList}~"
+        msg "latch/mr: myMirrorList -> ${myMirrorList}"
 
         if
                 command -v "mawk" 1>/dev/null 2>&1;
@@ -43,9 +43,10 @@ mr_action ()
         command rm -f -- "${myLog}"/?*.log
 
         command "$bin" \
-                -f "${mySrcList}" \
+                -f "${myMirrorList}" \
                 -f "${myRoot}/lib/awk/common.awk" \
-                -f "${myRoot}/lib/awk/mr.awk" -- -a "$myMrAction" \
+                -f "${myRoot}/lib/awk/mr.awk" \
+                -- -a "$myMrAction" \
         | command xargs -E "" -L 1 -P 6 -x -r sh -c '
                 set -e;
                 exec >> "${myLog}/${$}.log";
@@ -59,6 +60,7 @@ mr_action ()
                 cd -- "$MIRROR";
                 export MIRROR WORKTREE;
                 eval "$2";
+                # TODO
                 command cat "${myLog}/${$}.log" > "$ytt";
         ' sh;
 
