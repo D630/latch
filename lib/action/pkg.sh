@@ -75,7 +75,7 @@ IN
                 if
                         gcheckout "${3:-$KEY_NAME}" 1>/dev/null 2>&1;
                 then
-                        command chown "$myIds" "./.git/HEAD" "./.git/index" "./"*
+                        command chown "$myIds" "./.git/HEAD" "./.git/index" "./"?*
                         gget "description" 2>/dev/null;
                 else
                         msg "latch/pkg/error: could not check out: '${3:-$KEY_NAME}'"
@@ -120,29 +120,14 @@ IN
         plimit
 
         case "$myPkgAction" in
-        chop)
-                pchop
-        ;;
         info)
                 :
         ;;
-        init)
-                pinit
+        chop|init|purge|remove)
+                p${myPkgAction}
         ;;
-        install)
-                pinstall
-        ;;
-        purge)
-                ppurge
-        ;;
-        remove)
-                premove
-        ;;
-        stow)
-                pstow
-        ;;
-        unstow)
-                punstow
+        install|stow|unstow)
+                p${myPkgAction}
         ;;
         *)
                 die "latch/pkg/error: unknown argument -? '${myPkgAction}'"

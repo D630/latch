@@ -30,7 +30,7 @@ pchop ()
 pconfigure ()
 {
         if
-                IFS= read -r myContext < "${myKeyRing}/LCONTEXT"
+                IFS='|' read -r _ _ myContext < "${myKeyRing}/LINFO" || :;
         then
                 msg "latch/pkg/pconfigure: myContext -> ${myContext}"
         else
@@ -71,7 +71,7 @@ pconfigure ()
                 command sed -e 's|/|::|g' <<IN
 ${KEY_NAME}
 IN
-        )"
+        )" \
         PKG_VERSION="${DISTDIR_DESC}/${KEY_DESC}" \
         DESTDIR="${STOW_DIR}/${PKG_NAME}"
 
@@ -101,7 +101,7 @@ IN
                 then
                         echo "isPacked=true"
                 else
-                        exit
+                        :
                 fi
 
                 echo "currentBranch=$(
@@ -118,7 +118,7 @@ IN
                 test -e "$myPkgList"
         then
                 stowedIs="$(
-                        command grep -e "^${PKG_NAME}|${DISTDIR_DESC}|${KEY_DESC}|${myContext}|1$" "$myPkgList" \
+                        command grep -e "^${PKG_NAME}|[^|]*|[^|]*|${myContext}|1$" "$myPkgList" \
                         | {
                                 IFS='|' read -r _ d k _ _ || :;
                                 echo "${d:+${d}/}${k}"

@@ -16,6 +16,7 @@ _a= \
 myAction= \
 myArgs= \
 myCheckout= \
+myKey= \
 myKeyRing= \
 myLog= \
 myMirror= \
@@ -32,6 +33,7 @@ myRoot="${myRoot%/bin}"
 
 readonly \
         myCheckout="${myRoot}/var/checkout" \
+        myKey="${myRoot}/var/key" \
         myKeyRing="${myRoot}/var/ring" \
         myLog="${myRoot}/var/log" \
         myMirror="${myRoot}/var/mirror" \
@@ -41,6 +43,7 @@ readonly \
 
 export \
         myCheckout \
+        myKey \
         myKeyRing \
         myLog \
         myMirror \
@@ -52,6 +55,7 @@ export \
 
 msg "latch/main: myRoot -> ${myRoot}"
 msg "latch/main: myKeyRing -> ${myKeyRing}"
+msg "latch/main: myKey -> ${myKey}"
 msg "latch/main: myMirror -> ${myMirror}"
 msg "latch/main: myLog -> ${myLog}"
 msg "latch/main: myCheckout -> ${myCheckout}"
@@ -76,6 +80,7 @@ readonly myArgs
 
 command mkdir -p \
         "$myCheckout" \
+        "$myKey" \
         "$myKeyRing" \
         "$myLog" \
         "$myMirror";
