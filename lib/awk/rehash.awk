@@ -17,7 +17,7 @@ function loadRemotes() {
 function mergeRemotes(      r) {
         for (r in Remotes) {
                 Mirrors[r ".git"] = 1;
-                Config[r ".git", "mirror"] = sprintf("git_mirror_mirror '%s' '%s.git'", Remotes[r], basename(r))
+                Config[r ".git", "mirror"] = sprintf("git_mirror '%s' '%s.git'", Remotes[r], basename(r))
         }
 }
 

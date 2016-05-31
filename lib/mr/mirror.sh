@@ -1,12 +1,13 @@
 #!/usr/bin/env sh
 
-git_mirror_mirror ()
+git_mirror ()
 {
         if
                 ! test -n "$2"
         then
                 die "latch/mr/mirror/error: need two parameters"
         fi
+
         if
                 [ "$(GIT_CONFIG="${MIRROR}/config" command git config --get core.bare)" = "true" ]
         then

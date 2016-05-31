@@ -11,12 +11,7 @@ BEGIN {
 
         _Mirrors[ \
                 "- name:            DEFAULT",
-                "  git_mirror:      die disabled",
-                "  git_wclone:      git_worktree_clone",
-                "  git_wpurge:      git_worktree_purge",
-                "  git_wrebase:     git_worktree_update rebase",
-                "  git_wreset:      git_worktree_update reset",
-                "  git_wupdate:     git_worktree_update" \
+                "  git_mirror:      true" \
         ]++
 }
 

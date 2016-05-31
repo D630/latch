@@ -66,6 +66,13 @@ gclean ()
         command git clean -dfx
 }
 
+gclone ()
+{
+        command git clone -v \
+                --no-checkout --local --progress \
+                        --recursive -- "$1" "$2";
+}
+
 gcommit ()
 {
         command git add -A ./*
@@ -91,7 +98,7 @@ currentBranch)
         command git rev-parse --abbrev-ref HEAD
 ;;
 description)
-        command git describe --always
+        command git describe --always "${2:+$2}"
 ;;
 *)
         die "latch/gget/error: unknown argument -? ${1}"

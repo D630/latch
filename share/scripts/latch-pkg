@@ -3,7 +3,7 @@
 set -e
 
 case "$1" in
-chop|info|init|install|purge|remove|stow|unstow|unstow-curr)
+chop|init|install|purge|remove|stow|test|unstow|unstow-curr)
         action="$1"
         shift 1
 ;;
@@ -32,9 +32,6 @@ done
 : ${expr:? context missing}
 
 cd -- "/home/latch/var/ring"
-GIT_DIR="./.git" \
-GIT_WORK_TREE="$PWD" \
-        git checkout master 1>/dev/null 2>&1
 
 grep -F ${expr} "./LINFO" \
 | sed -e 's#|.*$##' \

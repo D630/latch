@@ -32,6 +32,7 @@ pkg_action ()
         myContext= \
         myHostname= \
         myIds= \
+        myKey= \
         myPkgAction= \
         myUser= \
         myXstowConfig= \
@@ -47,20 +48,20 @@ pkg_action ()
                 [ "$1" = "unstow-curr" ]
         then
                 shift 1
-                local _p
-                _p="$(
-                        __p="$(
-                                command sed -e 's|/|::|g' <<S
+                local _p __p stowed is
+                __p="$(
+                        command sed -e 's|/|::|g' <<S
 ${1}
 S
-                        )";
-                        command grep -e "^${__p}|[^|]*|[^|]*|[^|]*|1\$" "$myPkgList" \
-                        | {
-                                IFS='|' read -r _ d k _ _ || :;
-                                echo "${d:-_}" "${k:-_}"
-                        };
+                )";
+                _p="$(
+                        command grep -e "^${__p}|[^|]*|[^|]*|[^|]*|1\$" \
+                                "$myPkgList";
                 )"
-                eval set -- "unstow" "$1" "$_p"
+                IFS='|' read -r _ stowed is _ _ <<S
+${_p}
+S
+                eval set -- "unstow" "$1" "${stowed:?}" "${is:?}"
         fi
 
         readonly myPkgAction="$1"
@@ -87,7 +88,7 @@ IN
 
         msg "latch/pkg: KEY_NAME -> ${KEY_NAME:=$1}"
 
-        KEY_DESC="$(
+        eval "$(
                 cd -- "$myKeyRing"
 
                 export \
@@ -95,61 +96,86 @@ IN
                         GIT_WORK_TREE="$myKeyRing";
 
                 if
-                        gcheckout "${3:-$KEY_NAME}" 1>/dev/null 2>&1;
+                        command git grep \
+                                -G \
+                                --color=never \
+                                -h \
+                                -e "^${KEY_NAME}|[^|]*|[^|]*\$" \
+                                "${KEY_NAME}" \
+                                -- ./LINFO 2>/dev/null;
                 then
-                        command chown "$myIds" "./.git/HEAD" "./.git/index" "./"?*
-                        gget "description" 2>/dev/null;
+                        gget "description" "${3:-$KEY_NAME}" 2>/dev/null;
                 else
-                        msg "latch/pkg/error: could not check out: '${3:-$KEY_NAME}'"
-                        die "latch/pkg/error: latchkey not hammered? '${KEY_NAME}'"
-                fi
+                        die "latch/pkg/error: Could not describe '${3:-$KEY_NAME}' in '${myKeyRing}'"
+                fi \
+                | {
+                        IFS='|' read -r _ _ myContext;
+                        IFS= read -r KEY_DESC;
+                        echo myContext="$myContext" KEY_DESC="$KEY_DESC"
+                }
         )"
-        msg "latch/pkg: KEY_DESC -> ${KEY_DESC}"
-
-        msg "latch/pkg: DISTDIR -> ${DISTDIR:="${myCheckout}/${KEY_NAME}"}"
-        command mkdir -p "$DISTDIR"
+        msg "latch/pkg: KEY_DESC -> ${KEY_DESC:?}"
 
         DISTDIR_DESC="$(
-                cd -- "$DISTDIR"
+                cd -- "${myMirror}/${KEY_NAME}.git"
 
-                export \
-                        GIT_DIR="${DISTDIR}/.git" \
-                        GIT_WORK_TREE="$DISTDIR";
+                export GIT_DIR="${myMirror}/${KEY_NAME}.git"
 
                 if
-                        gcheckout "${2:-master}" 1>/dev/null 2>&1;
+                        ! gget "description" "${2:-HEAD}" 2>/dev/null;
                 then
-                        command chown -R "$myIds" "./.git/HEAD" "./.git/index"
-                        gget "description" 2>/dev/null;
-                else
-                        msg "latch/pkg/error: could not check out: '${2:-master}'"
-                        die "latch/pkg/error: DISTDIR not checked out by 'mr wupdate'? '${DISTDIR}'"
+                        die "latch/pkg/error: Could not describe '${2:-HEAD}' in '${myMirror}/${KEY_NAME}.git'"
                 fi
         )"
         msg "latch/pkg: DISTDIR_DESC -> ${DISTDIR_DESC}"
 
+        if
+                test -n "$myContext"
+        then
+                msg "latch/pkg: myContext -> ${myContext}"
+        else
+                die "latch/pkg/error: myContext -?"
+        fi
+
         readonly \
-                DISTDIR \
                 DISTDIR_DESC \
                 KEY_DESC \
                 KEY_NAME \
-                myPkgAction \
+                myContext \
                 myIds \
+                myPkgAction \
                 myUser;
 
         pconfigure
-        . "${myKeyRing}/LBUILD"
         plimit
 
         case "$myPkgAction" in
-        info)
+        test)
                 :
         ;;
         chop|init|purge|remove)
+                readonly DESTDIR="${STOW_DIR}/${PKG_NAME}"
+                msg "latch/pkg/p${myPkgAction}: DESTDIR -> ${DESTDIR}"
                 p${myPkgAction}
         ;;
-        install|stow|unstow)
+        stow|unstow)
+                readonly \
+                        DESTDIR="${STOW_DIR}/${PKG_NAME}" \
+                        myKey="${myRoot}/tmp/key/${PKG_NAME}";
+                msg "latch/pkg/p${myPkgAction}: DESTDIR -> ${DESTDIR}"
+                msg "latch/pkg/p${myPkgAction}: myKey -> ${myKey}"
+                command rm -fr "$myKey"
+                gclone "$myKeyRing" "$myKey"
+                cd -- "$myKey"
+                export \
+                        GIT_DIR="${myKey}/.git" \
+                        GIT_WORK_TREE="$myKey";
+                gcheckout "$KEY_DESC"
+                . "${myKey}/LBUILD"
                 p${myPkgAction}
+        ;;
+        install)
+                pinstall
         ;;
         *)
                 die "latch/pkg/error: unknown argument -? '${myPkgAction}'"

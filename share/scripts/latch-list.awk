@@ -6,12 +6,6 @@ function replace(str) {
 }
 
 function build(     b,c,d,u,cmd) {
-        while ((getline u < "/home/latch/var/UPDATES") > 0) {
-                Src[replace(u), "u"]++
-        };
-
-        close("/home/latch/var/UPDATES");
-
         cmd = "cat /home/latch/var/pkg.list";
 
         FS = "|";
@@ -29,16 +23,15 @@ function build(     b,c,d,u,cmd) {
 }
 
 function output(    _s, s) {
-        print "N|C|P|S|U";
+        print "N|C|P|S";
         for (_s in Src) {
                 if (_s ~ /\|n$/) {
                         split(_s, s, SUBSEP);
-                        printf("%s|%s|%d|%d|%d\n",
+                        printf("%s|%s|%d|%d\n",
                                         s[1],
                                         Src[s[1],"c"],
                                         Src[s[1],"b"],
-                                        Src[s[1],"s"],
-                                        Src[s[1],"u"] \
+                                        Src[s[1],"s"] \
                         )
                 }
         }

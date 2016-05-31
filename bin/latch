@@ -15,13 +15,12 @@ fi
 _a= \
 myAction= \
 myArgs= \
+myBuild= \
 myCheckout= \
-myKey= \
 myKeyRing= \
 myLog= \
 myMirror= \
 myMirrorList= \
-myMrAction= \
 myPkgList= \
 myRoot=;
 
@@ -32,8 +31,8 @@ myRoot="$(
 myRoot="${myRoot%/bin}"
 
 readonly \
-        myCheckout="${myRoot}/var/checkout" \
-        myKey="${myRoot}/var/key" \
+        myBuild="${myRoot}/tmp/build" \
+        myCheckout="${myRoot}/tmp/checkout" \
         myKeyRing="${myRoot}/var/ring" \
         myLog="${myRoot}/var/log" \
         myMirror="${myRoot}/var/mirror" \
@@ -42,8 +41,8 @@ readonly \
         myRoot;
 
 export \
+        myBuild \
         myCheckout \
-        myKey \
         myKeyRing \
         myLog \
         myMirror \
@@ -54,11 +53,11 @@ export \
 . "${myRoot}/lib/setup.sh"
 
 msg "latch/main: myRoot -> ${myRoot}"
-msg "latch/main: myKeyRing -> ${myKeyRing}"
-msg "latch/main: myKey -> ${myKey}"
-msg "latch/main: myMirror -> ${myMirror}"
-msg "latch/main: myLog -> ${myLog}"
+msg "latch/main: myBuild -> ${myBuild}"
 msg "latch/main: myCheckout -> ${myCheckout}"
+msg "latch/main: myKeyRing -> ${myKeyRing}"
+msg "latch/main: myLog -> ${myLog}"
+msg "latch/main: myMirror -> ${myMirror}"
 
 for _a
 do
@@ -79,8 +78,8 @@ msg "latch/main: myArgs -> ${myArgs}"
 readonly myArgs
 
 command mkdir -p \
+        "$myBuild" \
         "$myCheckout" \
-        "$myKey" \
         "$myKeyRing" \
         "$myLog" \
         "$myMirror";

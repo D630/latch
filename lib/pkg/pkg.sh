@@ -29,15 +29,6 @@ pchop ()
 
 pconfigure ()
 {
-        if
-                IFS='|' read -r _ _ myContext < "${myKeyRing}/LINFO"
-        then
-                msg "latch/pkg/pconfigure: myContext -> ${myContext}"
-        else
-                die "latch/pkg/pconfigure/error: myContext -?"
-        fi
-        readonly myContext
-
         context "$myContext"
 
         msg "latch/pkg/pconfigure: useId -> ${useId}"
@@ -72,21 +63,19 @@ pconfigure ()
 ${KEY_NAME}
 IN
         )" \
-        PKG_VERSION="${DISTDIR_DESC}/${KEY_DESC}" \
-        DESTDIR="${STOW_DIR}/${PKG_NAME}"
+        PKG_VERSION="${DISTDIR_DESC}/${KEY_DESC}"
 
         msg "latch/pkg/pconfigure: PKG_NAME -> ${PKG_NAME}"
-        msg "latch/pkg/pconfigure: DESTDIR -> ${DESTDIR}"
         msg "latch/pkg/pconfigure: PKG_VERSION -> ${PKG_VERSION}"
 
-        command mkdir -p "$DESTDIR"
+        command mkdir -p "${STOW_DIR}/${PKG_NAME}"
 
         eval "$(
-                cd -- "$DESTDIR"
+                cd -- "${STOW_DIR}/${PKG_NAME}"
 
                 export \
-                        GIT_DIR="${DESTDIR}/.git" \
-                        GIT_WORK_TREE="$DESTDIR";
+                        GIT_DIR="${STOW_DIR}/${PKG_NAME}/.git" \
+                        GIT_WORK_TREE="${STOW_DIR}/${PKG_NAME}";
 
                 if
                         gcheck "isGit" 1>/dev/null 2>&1;
@@ -111,20 +100,27 @@ IN
                 echo arePacked="$(
                         gget "branchCnt" 2>/dev/null
                 )"
-
         )"
 
         if
                 test -e "$myPkgList"
         then
                 stowedIs="$(
-                        command grep -e "^${PKG_NAME}|[^|]*|[^|]*|${myContext}|1$" "$myPkgList" \
-                        | {
-                                IFS='|' read -r _ d k _ _ || :;
-                                echo "${d:+${d}/}${k}"
-                        };
+                        command grep \
+                                -e "^${PKG_NAME}|[^|]*|[^|]*|${myContext}|1$" \
+                                "$myPkgList" || :;
                 )"
-                : "${stowedIs:="<>"}"
+                local stowed is
+                IFS='|' read -r _ stowed is _ _ <<IN
+${stowedIs}
+IN
+                if
+                        test -n "$stowed" -a -n "$is"
+                then
+                        stowedIs="${stowed}/${is}"
+                else
+                        : "${stowedIs:="<>"}"
+                fi
         fi
 
         [ "$PKG_VERSION" = "$stowedIs" ] && isStowed="true";
@@ -137,7 +133,6 @@ IN
         msg "latch/pkg/pconfigure: isStowed -> ${isStowed}"
 
         readonly \
-                DESTDIR \
                 PKG_NAME \
                 PKG_VERSION \
                 STOW_DIR \
@@ -173,20 +168,34 @@ pinit ()
 
 pinstall ()
 {
-        cd -- "$DESTDIR"
+        readonly \
+                DESTDIR="${myBuild}/${PKG_NAME}" \
+                DISTDIR="${myCheckout}/${PKG_NAME}" \
+                myKey="${myRoot}/tmp/key/${PKG_NAME}";
 
+        msg "latch/pkg/pinstall: DISTDIR -> ${DISTDIR}"
+        msg "latch/pkg/pinstall: DESTDIR -> ${DESTDIR}"
+        msg "latch/pkg/pinstall: myKey -> ${myKey}"
+
+        command rm -fr "$DESTDIR" "$DISTDIR" "$myKey"
+        command mkdir -p "$DESTDIR"
+
+        gclone "${myMirror}/${KEY_NAME}.git" "$DISTDIR";
+        gclone "$myKeyRing" "$myKey";
+
+        cd -- "$myKey"
         export \
-                GIT_DIR="${DESTDIR}/.git" \
-                GIT_WORK_TREE="$DESTDIR";
+                GIT_DIR="${myKey}/.git" \
+                GIT_WORK_TREE="$myKey";
+        gcheckout "$KEY_DESC"
 
-        msg "latch/pkg/pinstall: Branching pkg version ..."
-        gbranch "add" "$PKG_VERSION" "add pkg version ${PKG_VERSION}"
-
-        unset -v \
-                GIT_DIR \
-                GIT_WORK_TREE;
+        . "${myKey}/LBUILD"
 
         cd -- "$DISTDIR"
+        export \
+                GIT_DIR="${DISTDIR}/.git" \
+                GIT_WORK_TREE="$DISTDIR";
+        gcheckout "$DISTDIR_DESC"
 
         (
                 msg "latch/pkg/pinstall: Invoking src_env() ..."
@@ -201,22 +210,17 @@ pinstall ()
                 ( src_install )
         )
 
-        # TODO
-        gclean
-        greset "hard"
-        [ "$myContext" = "local" ] || {
-                command chown -R "$myIds" \
-                        "./.git/HEAD" \
-                        "./.git/ORIG_HEAD" \
-                        "./.git/index" \
-                        "./"*;
-        };
-
-        cd -- "$DESTDIR"
+        cd -- "${STOW_DIR}/${PKG_NAME}"
 
         export \
-                GIT_DIR="${DESTDIR}/.git" \
-                GIT_WORK_TREE="$DESTDIR";
+                GIT_DIR="${STOW_DIR}/${PKG_NAME}/.git" \
+                GIT_WORK_TREE="${STOW_DIR}/${PKG_NAME}";
+
+        msg "latch/pkg/pinstall: Branching pkg version ..."
+        gbranch "add" "$PKG_VERSION" "add pkg version ${PKG_VERSION}"
+
+        msg "latch/pkg/pinstall: Moving pkg files to '${STOW_DIR}/${PKG_NAME}' ..."
+        command cp -fpR -- "${DESTDIR}"/. "${STOW_DIR}/${PKG_NAME}"
 
         msg "latch/pkg/pinstall: Committing pkg version ..."
         gcommit "commit pkg version ${PKG_VERSION}"
@@ -232,9 +236,6 @@ pinstall ()
         pregister "pkg"
 
         msg "latch/pkg/pinstall: DONE"
-
-        # TODO
-        command chmod -R 755 "${DESTDIR}"/?*
 }
 
 __plimit ()
@@ -287,7 +288,7 @@ plimit ()
         then
                 die "latch/pkg/plimit/error: Something went wrong, really"
         else
-                _l=" ${_l} info "
+                _l=" ${_l} test "
         fi
 
         msg "latch/pkg/plimit: {${_l}}"
@@ -297,7 +298,7 @@ plimit ()
                 :
         ;;
         *)
-                die "latch/pkg/plimit/error: damn, myPkgAction cannot be executed: '${myPkgAction}'"
+                die "latch/pkg/plimit/error: myPkgAction cannot be executed: '${myPkgAction}'"
         esac
 }
 
@@ -396,6 +397,8 @@ pstow ()
         msg "latch/pkg/pstow: Invoking stow_post() ..."
         (
                 stow_post
+                # TODO
+                command chmod -R 755 "${STOW_DIR}/${PKG_NAME}"
         )
 
         msg "latch/pkg/pstow: Registering stowed version ..."
