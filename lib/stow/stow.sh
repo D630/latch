@@ -1,5 +1,39 @@
 #!/usr/bin/env sh
 
+slimit ()
+{
+        local _l
+        _l=_
+
+        case "${isInitialized}::${isPacked}::${isStowed}" in
+        false::*)
+                :
+        ;;
+        true::false::*)
+                :
+        ;;
+        true::true::false)
+                if
+                        [ "$stowedIs" = "null" ]
+                then
+                        _l="add"
+                else
+                        _l="delete"
+                fi
+        ;;
+        true::true::true)
+                _l="delete"
+        esac
+
+        if
+                [ "$_l" = "$myStowAction" ]
+        then
+                msg "{ ${_l} }"
+        else
+                die "myStowAction cannot be executed: '${myStowAction}'"
+        fi
+}
+
 sstow ()
 {
         command xstow -v 3 \

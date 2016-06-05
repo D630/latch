@@ -10,68 +10,79 @@ You need a POSIX shell + "local" builtin command to make this business work prop
 Subcommands
 -----------
 forge
+    Manages the latchkey ring and its latchkeys:
+
     add                 Add a latchkey (Git branch) to the ring; create
                         a LINFO  file and a LBUILD template.
                         $1 := URI
                         $2 := BRANCH
-                        ++ := CONTEXT
-    commit              Update the index and store changes in new a
-                        commit.
+                        [ $3 := CONTEXT ]
+    commit              Update the index and store changes in new a commit.
     remove              Destroy latchkey.
                         $1 := BRANCH
     ring                Initialize empty "latchkey ring"
                         (non-bare Git repository).
 
 mr
+    Clones and fetches code from the source code remote repositories:
+
     mirror              Mirror or update all configured remotes (bare Git
                         repositories).
 
 pkg
+    Manages the installation of stow packages by putting source code repos and
+    and latchkeys together:
+
+    build               Build a source package by using the correspond latchkey
+                        (LBUILD file).
     chop                Delete all installed stow packages, but the stowed one.
                         $1 := BRANCH
     init                Initialize empty stow package directory
                         (non-bare Git repository).
                         $1 := BRANCH
-    install             Build and install a package version into a
-                        stow package directory (via LBUILD file).
+    install             Install a build source package version into the
+                        initialized stow package directory.
                         $1 := BRANCH
-                        ++ := commit-ish of mirror
-                        ++ := commit-ish of latchkey
-    purge               Purge a stow package directory and all package
+                        [ $2 := <commit-ish of mirror> ]
+                        [ $3 := <commit-ish of latchkey> ]
+    purge               Purge a stow package directory and all stow package
                         versions in it.
                         $1 := BRANCH
-    remove              Remove/Delete a package version.
+    remove              Remove/Delete a stow package version.
                         $1 := BRANCH
-                        ++ := commit-ish of mirror
-                        ++ := commit-ish of latchkey
-    stow                Stow pkg into the target directory.
+                        [ $2 := <commit-ish of mirror> ]
+                        [ $3 := <commit-ish of latchkey> ]
+    test                Show, how a package would be configured.
                         $1 := BRANCH
-                        ++ := commit-ish of mirror
-                        ++ := commit-ish of latchkey
-    test                Show, how a pkg command would be configured.
-                        $1 := BRANCH
-                        ++ := commit-ish of mirror
-                        ++ := commit-ish of latchkey
-    unstow              Delete stowed pkg from the target directory.
-                        $1 := BRANCH
-                        ++ := commit-ish of mirror
-                        ++ := commit-ish of latchkey
-    unstow-curr         Alias for:
-                        $1 := BRANCH
-                        $2 := commit-ish of stowed mirror
-                        $3 := commit-ish of stowed latchkey
+                        [ $2 := <commit-ish of mirror> ]
+                        [ $3 := <commit-ish of latchkey> ]
 
 rehash
-                        Read LINFO from the master latchkey and record all
-                        keys and mirror in the mirror.list file.
+    Reads the LINFO file from the master latchkey and records all keys and
+    mirrors in the mirror.list file.
+
+stow
+    Link/Unlink installed stow packages into the system:
+
+    add                 Stow a stow package into the stow target directory.
+                        [ $1 := PKG_VERSION ]
+    delete              Unstow the stowed stow package from the stow target
+                        directory.
+                        [ $1 := PKG_VERSION ]
 
 Arguments
 ---------
-    BRANCH                              github.com/junegunn/fzf
-    CONTEXT                             local | global | system
-    URI                                 http://git.suckless.org/st
-    commit-ish of stowed mirror         See `git describe --always`
-    commit-ish of stowed latchkey       See `git describe --always`
+    BRANCH                              Pathname of the URI:
+                                        github.com/junegunn/fzf
+    CONTEXT                             Determines the stow directory etc.:
+                                        local | global | system
+    URI                                 Remote or local uris:
+                                        http://git.suckless.org/st
+    PKG_VERSION                         <commit-ish of mirror>/<commit-ish of
+                                        latchkey>:
+                                        v2.4-3-g8c91196/fc88d0b
+    <commit-ish of mirror>              See `git describe --always`
+    commit-ish of latchkey>             See `git describe --always`
 ```
 
 ##### REMINDER
@@ -92,6 +103,8 @@ git clone "https://github.com/D630/latch-config" etc
 ```
 
 ###### EXAMPLES
+
+TODO
 
 ##### SONG OF THE REPO
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-rehash_action ()
+rehash__main ()
 (
         bin= \
         myLInfo="${myKeyRing}/LINFO";
@@ -18,7 +18,7 @@ rehash_action ()
                 fi
 
                 command cp -f -- "$myMirrorList" "${myMirrorList}~"
-                msg "latch/rehash: myMirrorList -> ${myMirrorList}"
+                msg "myMirrorList := ${myMirrorList}"
         )
 
         export \
@@ -46,8 +46,6 @@ rehash_action ()
                 -f "${myMirrorList}" \
                 -f "${myRoot}/lib/awk/common.awk" \
                 -f "${myRoot}/lib/awk/rehash.awk";
-
-        msg "latch/rehash: DONE"
 )
 
 # vim: set ts=8 sw=8 tw=0 et :

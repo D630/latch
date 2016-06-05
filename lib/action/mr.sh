@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-mr_action ()
+mr__main ()
 (
         bin=
         myMrAction=
@@ -11,12 +11,12 @@ mr_action ()
         if
                 [ "$#" -ne 1 -o "$1" = "{}" ]
         then
-                die "latch/mr/error: unknown arguments -? ${@}"
+                die "unknown arguments: '${@}'"
         else
                 readonly myMrAction="$1"
         fi
 
-        msg "latch/mr: myMrAction -> ${myMrAction}"
+        msg "myMrAction := ${myMrAction}"
 
         cd -- "${myMirror%/*}"
 
@@ -26,7 +26,7 @@ mr_action ()
                 skel "mirror" .
         fi
         command cp -f -- "$myMirrorList" "${myMirrorList}~"
-        msg "latch/mr: myMirrorList -> ${myMirrorList}"
+        msg "myMirrorList := ${myMirrorList}"
 
         if
                 command -v "mawk" 1>/dev/null 2>&1;
@@ -51,20 +51,18 @@ mr_action ()
                 set -e;
                 exec >> "${myLog}/${$}.log";
                 exec 2>&1;
-                echo "latch/mr: Processing ${1} ...";
+                echo "latch/mr: processing ${1} ...";
                 . "${myRoot}/lib/setup.sh";
                 import mr;
-                WORKTREE="${myCheckout}/${1%.git}";
+                #WORKTREE="${myCheckout}/${1%.git}";
                 MIRROR="${myMirror}/${1}";
-                command mkdir -p "$MIRROR" "$WORKTREE";
+                command mkdir -p "$MIRROR" #"$WORKTREE";
                 cd -- "$MIRROR";
-                export MIRROR WORKTREE;
+                export MIRROR #WORKTREE;
                 eval "$2";
                 # TODO
                 command cat "${myLog}/${$}.log" > "$ytt";
         ' sh;
-
-        msg "latch/mr: DONE"
 )
 
 # vim: set ts=8 sw=8 tw=0 et :

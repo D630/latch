@@ -3,12 +3,11 @@
 set -e
 set -u
 
-#trap 'p=$? ; command rm -f .lock ; exit $p' 1 2 3 6 9 15 EXIT
 if
          exec 9<"$0";
          ! command flock -n 9
 then
-         printf '%s\n' "latch/error: Sorry, I am already running" 1>&2;
+         printf '%s\n' "latch/main/error: sorry, I am already running" 1>&2;
          exit 1
 fi
 
@@ -17,6 +16,7 @@ myAction= \
 myArgs= \
 myBuild= \
 myCheckout= \
+myKey= \
 myKeyRing= \
 myLog= \
 myMirror= \
@@ -33,6 +33,7 @@ myRoot="${myRoot%/bin}"
 readonly \
         myBuild="${myRoot}/tmp/build" \
         myCheckout="${myRoot}/tmp/checkout" \
+        myKey="${myRoot}/tmp/key" \
         myKeyRing="${myRoot}/var/ring" \
         myLog="${myRoot}/var/log" \
         myMirror="${myRoot}/var/mirror" \
@@ -43,6 +44,7 @@ readonly \
 export \
         myBuild \
         myCheckout \
+        myKey \
         myKeyRing \
         myLog \
         myMirror \
@@ -52,19 +54,20 @@ export \
 
 . "${myRoot}/lib/setup.sh"
 
-msg "latch/main: myRoot -> ${myRoot}"
-msg "latch/main: myBuild -> ${myBuild}"
-msg "latch/main: myCheckout -> ${myCheckout}"
-msg "latch/main: myKeyRing -> ${myKeyRing}"
-msg "latch/main: myLog -> ${myLog}"
-msg "latch/main: myMirror -> ${myMirror}"
+msg "myRoot := ${myRoot}"
+msg "myBuild := ${myBuild}"
+msg "myCheckout := ${myCheckout}"
+msg "myKey := ${myKey}"
+msg "myKeyRing := ${myKeyRing}"
+msg "myLog := ${myLog}"
+msg "myMirror := ${myMirror}"
 
 for _a
 do
         case "$_a" in
-        forge|mr|pkg|rehash)
+        forge|mr|pkg|rehash|stow)
                 readonly myAction="$_a"
-                msg "latch/main: myAction -> ${myAction}"
+                msg "myAction := ${myAction}"
                 shift 1
         ;;
         *)
@@ -74,12 +77,13 @@ do
 done
 
 : "${myArgs:={\}}"
-msg "latch/main: myArgs -> ${myArgs}"
+msg "myArgs := ${myArgs}"
 readonly myArgs
 
 command mkdir -p \
         "$myBuild" \
         "$myCheckout" \
+        "$myKey" \
         "$myKeyRing" \
         "$myLog" \
         "$myMirror";

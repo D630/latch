@@ -39,7 +39,7 @@ function loadConfig(    _i, _m, _n, m, s) {
                         } else if (match(m[_i], "^  [^: \t\r\n\013\f\b\007]+:[ \t\r\n\013\f\b\007]+.+$")) {
                                 # TODO
                                 if (! length(s)) {
-                                        die("latch/awk/error: Could not found a section name for: " m[_i])
+                                        die("latch/awk/error: could not found a section name for: " m[_i])
                                 };
                                 Config[s,getKey(m[_i])] = getVal(m[_i]);
                                 Mirrors[s]++

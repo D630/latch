@@ -5,24 +5,16 @@ git_mirror ()
         if
                 ! test -n "$2"
         then
-                die "latch/mr/mirror/error: need two parameters"
+                die "need two parameters"
         fi
 
         if
                 [ "$(GIT_CONFIG="${MIRROR}/config" command git config --get core.bare)" = "true" ]
         then
-                if
-                        git_mirror_update
-                then
-                        msg "latch/mr/mirror: DONE"
-                fi
+                git_mirror_update
         else
                 cd ..
-                if
-                        git_mirror_clone "$@"
-                then
-                        msg "latch/mr/mirror: DONE"
-                fi
+                git_mirror_clone "$@"
         fi
 }
 

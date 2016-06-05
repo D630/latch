@@ -19,7 +19,7 @@ delete)
         command git branch -df "$2"
 ;;
 *)
-        die "latch/gbranch/error: unknown argument -? ${1}"
+        die "unknown argument: '${1}'"
 esac
 
 gcheck ()
@@ -53,7 +53,7 @@ isValidUri)
         command git ls-remote -hq --exit-code "$2" 1>/dev/null 2>&1;
 ;;
 *)
-        die "latch/gcheck/error: unknown argument -? ${1}"
+        die "unknown argument: '${1}'"
 esac
 
 gcheckout ()
@@ -75,7 +75,7 @@ gclone ()
 
 gcommit ()
 {
-        command git add -A ./*
+        command git add -f -A
         command git commit -m "$1"
         command git repack -a -d && command git gc --prune;
 }
@@ -100,8 +100,23 @@ currentBranch)
 description)
         command git describe --always "${2:+$2}"
 ;;
+stowedBranch)
+        local b
+        b="$(command git rev-parse -q --verify stowed~0 || :;)"
+        if
+                test -n "$b"
+        then
+                command git branch --contains "$b" \
+                | {
+                        IFS=' ' read -r _ b;
+                        echo "$b"
+                }
+        else
+                echo "null"
+        fi
+;;
 *)
-        die "latch/gget/error: unknown argument -? ${1}"
+        die "unknown argument: '${1}'"
 esac
 
 ginit ()
@@ -121,7 +136,7 @@ remove)
         command git remote remove "$2"
 ;;
 *)
-        die "latch/gremote/error: unknown argument -? ${1}"
+        die "unknown argument: '${1}'"
 esac
 
 greset ()
@@ -130,7 +145,28 @@ hard)
         command git reset --hard
 ;;
 *)
-        die "latch/greset/error: unknown argument -? ${1}"
+        die "unknown argument: '${1}'"
+esac
+
+gsubmodule ()
+case "$1" in
+update)
+        command git submodule update --init --recursive
+;;
+*)
+        die "unknown argument: '${1}'"
+esac
+
+gtag ()
+case "$1" in
+add)
+        command git tag -f -m "stowed" stowed "$PKG_VERSION"
+;;
+delete)
+        command git tag -d stowed
+;;
+*)
+        die "unknown argument: '${1}'"
 esac
 
 # vim: set ts=8 sw=8 tw=0 et :
