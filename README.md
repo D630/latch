@@ -13,28 +13,31 @@ forge
     Manages the latchkey ring and its latchkeys:
 
     add                 Add a latchkey (Git branch) to the ring; create
-                        a LINFO  file and a LBUILD template.
+                        a LINFO file and a LBUILD template.
                         $1 := URI
                         $2 := BRANCH
                         [ $3 := CONTEXT ]
-    commit              Update the index and store changes in new a commit.
+    commit              Update the index and store changes in a new commit.
     remove              Destroy latchkey.
                         $1 := BRANCH
-    ring                Initialize empty "latchkey ring"
+    ring                Initialize empty latchkey ring
                         (non-bare Git repository).
 
 mr
     Clones and fetches code from the source code remote repositories:
 
-    mirror              Mirror or update all configured remotes (bare Git
+    mirror              Mirror or update all configured repos (bare Git
                         repositories).
 
 pkg
     Manages the installation of stow packages by putting source code repos and
     and latchkeys together:
 
-    build               Build a source package by using the correspond latchkey
-                        (LBUILD file).
+    build               Build a source package by using the corresponding
+                        latchkey (via LBUILD file).
+                        $1 := BRANCH
+                        [ $2 := <commit-ish of mirror> ]
+                        [ $3 := <commit-ish of latchkey> ]
     chop                Delete all installed stow packages, but the stowed one.
                         $1 := BRANCH
     init                Initialize empty stow package directory
@@ -82,7 +85,7 @@ Arguments
                                         latchkey>:
                                         v2.4-3-g8c91196/fc88d0b
     <commit-ish of mirror>              See `git describe --always`
-    commit-ish of latchkey>             See `git describe --always`
+    <commit-ish of latchkey>            See `git describe --always`
 ```
 
 ##### REMINDER

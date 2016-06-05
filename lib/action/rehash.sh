@@ -2,6 +2,12 @@
 
 rehash__main ()
 (
+        if
+                [ "$(idu)" -eq 0 ]
+        then
+                die "may not run as superuser"
+        fi
+
         bin= \
         myLInfo="${myKeyRing}/LINFO";
 

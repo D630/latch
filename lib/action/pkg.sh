@@ -48,8 +48,10 @@ pkg__build ()
         cd -- "$DESTDIR"
 
         command cp -fp -- "${KEYDIR}/LBUILD" "${DESTDIR}/.LBUILD"
+        echo "$PKG_VERSION" > "${DESTDIR}/.PKG_VERSION";
         command find -H "${DESTDIR}/." \
-                \( ! -name . -a ! -name .LFILES \) -prune \
+                \( ! -name . -a ! -name .LFILES -a ! -name .PKG_VERSION \) \
+                -prune \
                 > "${DESTDIR}/.LFILES";
 )
 
@@ -121,6 +123,15 @@ pkg__install ()
 
         msg "branching pkg version '${PKG_VERSION}'..."
         gbranch "add" "$PKG_VERSION" "add pkg version ${PKG_VERSION}"
+
+        msg "comparing build pkg version with '${PKG_VERSION}' ..."
+        local p
+        IFS= read -r p < "${DESTDIR}/.PKG_VERSION";
+        if
+                ! [ "$p" = "$PKG_VERSION" ]
+        then
+                die "the currently build package version is not the one you are going to install: '${p} <> ${PKG_VERSION}'"
+        fi
 
         msg "moving pkg files to '${STOW_DIR}/${PKG_NAME}' ..."
         #command cp -fpR -- "${DESTDIR}"/. "${STOW_DIR}/${PKG_NAME}"

@@ -1,0 +1,90 @@
+#!/usr/bin/env sh
+
+set -e
+
+expr=""
+
+case "$1" in
+build|chop|init|install|purge|remove|test)
+        action="$1"
+        shift 1
+
+        for _e in "$1" "${2:-_}"
+        do
+                case "$_e" in
+                local)
+                        readonly expr="-e |local"
+                ;;
+                global)
+                        expr="${expr} -e |global"
+                ;;
+                system)
+
+                        expr="${expr} -e |system"
+                esac
+        done
+
+        : ${expr:? context missing}
+
+        cd -- "/home/latch/var/ring"
+
+        git grep \
+                -F \
+                --color=never \
+                -h \
+                ${expr} \
+                "master" \
+                -- ./LINFO 2>/dev/null \
+        | sed -e 's#|.*$##' \
+        | {
+                set +e
+                while
+                        IFS= read -r n
+                do
+                        ../../bin/latch pkg "$action" "$n"
+                done
+        };
+;;
+add|delete)
+        action="$1"
+        shift 1
+
+        for _e in "$1" "${2:-_}"
+        do
+                case "$_e" in
+                local)
+                        readonly expr="-e |local|"
+                ;;
+                global)
+                        expr="${expr} -e |global|"
+                ;;
+                system)
+
+                        expr="${expr} -e |system|"
+                esac
+        done
+
+        : ${expr:? context missing}
+
+        cd -- "/home/latch/var"
+
+        grep -F ${expr} ./pkg.list \
+        | sed -e 's#|.*$##' \
+        | sed -e 's|::|/|g' \
+        | {
+                set +e
+                while
+                        IFS= read -r n
+                do
+                        ../../bin/latch stow "$action" "$n"
+                done
+        };
+;;
+*)
+        echo "noop" 1>&2;
+        exit 1
+esac
+
+
+
+# vim: set ts=8 sw=8 tw=0 et :

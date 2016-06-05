@@ -13,8 +13,8 @@ function build(     b,c,d,u,cmd) {
         while ((cmd | getline) > 0) {
                 Src[$1, "n"] = 1;
                 Src[$1, "b"]++
-                Src[$1, "c"] = $4
-                if ($5 == 1) {
+                Src[$1, "c"] = $5
+                if ($6 == 1) {
                         Src[$1, "s"]++
                 }
         };

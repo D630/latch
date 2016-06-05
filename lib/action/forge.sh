@@ -148,7 +148,13 @@ else
 fi
 
 forge__main ()
-{
+(
+        if
+                [ "$(idu)" -eq 0 ]
+        then
+                die "may not run as superuser"
+        fi
+
         import git
 
         eval set -- "$myArgs"
@@ -169,6 +175,6 @@ forge__main ()
         *)
                 "forge__${c}" "$@"
         esac
-}
+)
 
 # vim: set ts=8 sw=8 tw=0 et :

@@ -52,7 +52,7 @@ env ()
 {
         local _i _g
 
-        currentId="$(command id -u)"
+        currentId="$(idu)"
         msg "currentId := ${currentId}"
 
         myHostname="$(command hostname -s)"
@@ -78,6 +78,11 @@ IN
         else
                 die "myIds is not valid: '${myIds}'"
         fi
+}
+
+idu ()
+{
+        command id -u
 }
 
 import ()
