@@ -299,15 +299,21 @@ pkg__main ()
                         msg "DESTDIR := ${DESTDIR}"
                         "pkg__${myPkgAction}"
                 ;;
-                build|install)
-                        "pkg__${myPkgAction}"
+                build)
+                        pkg__build
+                        return 0
+                ;;
+                install)
+                        pkg__install
                 ;;
                 test)
-                        :
+                        return 0
                 ;;
                 *)
                         die "unknown argument: '${myPkgAction}'"
                 esac
+                # TODO
+                command chmod -R 755 "$DESTDIR"
         esac
 }
 
