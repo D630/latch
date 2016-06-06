@@ -76,7 +76,7 @@ add|delete)
                 while
                         IFS= read -r n
                 do
-                        ../../bin/latch stow "$action" "$n"
+                        ../bin/latch stow "$action" "$n"
                 done
         };
 ;;
