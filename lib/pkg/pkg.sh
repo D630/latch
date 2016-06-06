@@ -33,7 +33,7 @@ plimit ()
                 _l="init"
         ;;
         true::false::*)
-                _l="install purge"
+                _l="build install purge"
                 _plimit
         ;;
         true::true::false)
@@ -50,7 +50,7 @@ plimit ()
         then
                 die "alarm. something went wrong, really"
         else
-                _l=" ${_l} build test "
+                _l=" ${_l} build-force test "
         fi
 
         msg "{${_l}}"

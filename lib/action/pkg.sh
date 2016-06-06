@@ -287,7 +287,7 @@ pkg__main ()
                 PKG_VERSION;
 
         case "$myPkgAction" in
-        build)
+        build-force)
                 pkg__build
         ;;
         *)
@@ -297,10 +297,10 @@ pkg__main ()
                 chop|init|purge|remove)
                         readonly DESTDIR="${STOW_DIR}/${PKG_NAME}"
                         msg "DESTDIR := ${DESTDIR}"
-                        pkg__${myPkgAction}
+                        "pkg__${myPkgAction}"
                 ;;
-                install)
-                        pkg__install
+                build|install)
+                        "pkg__${myPkgAction}"
                 ;;
                 test)
                         :

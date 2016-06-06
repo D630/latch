@@ -8,9 +8,9 @@ mr__main ()
                 die "may not run as superuser"
         fi
 
-        bin=
-        myMrAction=
-        ytt=
+        bin= \
+        myMrAction= \
+        ytt=;
 
         eval set -- "$myArgs"
 
@@ -46,7 +46,8 @@ mr__main ()
         readonly ytt
         export ytt
 
-        command rm -f -- "${myLog}"/?*.log
+        command mkdir -p "${myLog}/mr"
+        command rm -f -- "${myLog}"/mr/?*.log
 
         command "$bin" \
                 -f "${myMirrorList}" \
@@ -55,7 +56,7 @@ mr__main ()
                 -- -a "$myMrAction" \
         | command xargs -E "" -L 1 -P 6 -x -r sh -c '
                 set -e;
-                exec >> "${myLog}/${$}.log";
+                exec >> "${myLog}/mr/${$}.log";
                 exec 2>&1;
                 echo "latch/mr: processing ${1} ...";
                 . "${myRoot}/lib/setup.sh";
@@ -67,7 +68,7 @@ mr__main ()
                 export MIRROR #WORKTREE;
                 eval "$2";
                 # TODO
-                command cat "${myLog}/${$}.log" > "$ytt";
+                command cat "${myLog}/mr/${$}.log" > "$ytt";
         ' sh;
 )
 
