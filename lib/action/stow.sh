@@ -14,6 +14,9 @@ stow__add ()
         msg "cleaning ..."
         gclean
 
+        msg "setting rights ..."
+        rights "$DESTDIR"
+
         . "./.LBUILD"
 
         msg "invoking stow_prae() ..."
@@ -39,8 +42,6 @@ stow__add ()
                         GIT_DIR \
                         GIT_WORK_TREE;
                 stow_post
-                # TODO
-                command chmod -R 755 "$DESTDIR"
         )
 
         msg "tagging '${PKG_VERSION}' ..."
@@ -60,6 +61,9 @@ stow__delete ()
 
         msg "checking out '${PKG_VERSION}' ..."
         gcheckout "$PKG_VERSION"
+
+        msg "setting rights ..."
+        rights "$DESTDIR"
 
         . "./.LBUILD"
 
@@ -122,7 +126,7 @@ stow__main ()
         myUser= \
         myXstowConfig= \
         stowedIs="null" \
-        useId=;
+        useIds=;
 
         import git stow
 

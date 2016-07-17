@@ -11,6 +11,8 @@ then
          exit 1
 fi
 
+command umask 002
+
 _a= \
 myAction= \
 myArgs= \

@@ -55,7 +55,7 @@ forge__add ()
                 gcheckout "master"
                 _fadd >> ./LINFO;
                 command sort -u -o ./LINFO ./LINFO
-                gcommit "forge latchkey ring"
+                gcommit "forge latchkey ring; after addition"
         fi
 }
 
@@ -128,7 +128,7 @@ forge__remove () {
 g/^$(echo "${b}|[^|]*|[^|]*" | command sed -e 's|/|\\/|g')\$/d
 w
 S
-                gcommit "forge latchkey ring"
+                gcommit "forge latchkey ring; after deletion"
         else
                 die "latchkey has not been hammered: '${b}'"
         fi
@@ -144,7 +144,7 @@ else
         ginit "hammer latchkey ring"
         msg "forging latchkey ring ..."
         printf '%s' "" > ./LINFO;
-        gcommit "forge latchkey ring"
+        gcommit "forge latchkey ring; after initialization"
 fi
 
 forge__main ()

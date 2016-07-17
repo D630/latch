@@ -90,6 +90,9 @@ pkg__init ()
 
         msg "initializing pkg repository ..."
         ginit "init"
+
+        msg "setting rights ..."
+        rights "$DESTDIR"
 )
 
 pkg__install ()
@@ -154,6 +157,9 @@ pkg__install ()
 
         trap - 1 2 3 6 9 15 EXIT
 
+        msg "setting rights ..."
+        rights "$DESTDIR"
+
         msg "committing pkg version '${PKG_VERSION}' ..."
         gcommit "commit pkg version ${PKG_VERSION}"
 
@@ -162,6 +168,8 @@ pkg__install ()
         then
                 msg "checking out '${stowedIs}' again ..."
                 gcheckout "$stowedIs"
+                msg "setting rights ..."
+                rights "$DESTDIR"
         fi
 
         msg "registering pkg version '${PKG_VERSION}' ..."
@@ -174,7 +182,7 @@ pkg__purge ()
         command rm -rf -- "$DESTDIR"
 
         msg "unnregistering all pkgs ..."
-        unregister any-pkg
+        unregister "any-pkg"
 }
 
 pkg__remove ()
@@ -192,14 +200,15 @@ pkg__remove ()
         gclean
 
         if
-                ! let "$arePacked - 1 > 0"
+                let "$arePacked - 1 > 0"
         then
-                msg "deinitializing pkg repo '${DESTDIR}' ..."
-                command rm -rf -- "$DESTDIR"
+                msg "setting rights ..."
+                rights "$DESTDIR"
+                msg "unregistering pkg version '${PKG_VERSION}' ..."
+                unregister "pkg"
+        else
+                pkg__purge
         fi
-
-        msg "unregistering pkg version '${PKG_VERSION}' ..."
-        unregister "pkg"
 )
 
 pkg__main ()
@@ -233,7 +242,7 @@ pkg__main ()
         myUser= \
         myXstowConfig= \
         stowedIs="null" \
-        useId=;
+        useIds=;
 
         import git pkg
 
@@ -312,8 +321,6 @@ pkg__main ()
                 *)
                         die "unknown argument: '${myPkgAction}'"
                 esac
-                # TODO
-                command chmod -R 755 "$DESTDIR"
         esac
 }
 

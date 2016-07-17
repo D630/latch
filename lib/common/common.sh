@@ -9,9 +9,8 @@ context ()
 {
         . "${myRoot}/etc/context/${1}.sh" && "${1}_context";
 
-        msg "useId := ${useId}"
-        [ "$currentId" -eq "$useId" ] || die "currentId does not match useId: '${currentId} <> ${useId}'";
-
+        msg "useIds := ${useIds}"
+        [ "$currentId" -eq "${useIds%:*}" ] || die "currentId does not match useId: '${currentId} <> ${useIds}'";
 
         msg "myXstowConfig := ${myXstowConfig}"
         if
@@ -39,7 +38,7 @@ context ()
                 STOW_DIR \
                 STOW_TARGET \
                 myXstowConfig \
-                useId;
+                useIds;
 }
 
 die ()
@@ -183,6 +182,15 @@ S
         esac
 
         command chown "$myIds" "$myPkgList"
+}
+
+rights ()
+{
+        # TODO
+        command find "$1" -type d -exec chmod 2775 {} + &
+        command find "$1" ! -type d -exec chmod 0775 {} + &
+        command chown -R "$useIds" "$1" &
+        wait
 }
 
 skel ()
