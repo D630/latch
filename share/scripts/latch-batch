@@ -5,7 +5,7 @@ set -e
 expr=""
 
 case "$1" in
-build|chop|init|install|purge|remove|test)
+build|build-force|chop|init|install|purge|remove|test)
         action="$1"
         shift 1
 

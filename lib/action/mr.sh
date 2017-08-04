@@ -54,7 +54,7 @@ mr__main ()
                 -f "${myRoot}/lib/awk/common.awk" \
                 -f "${myRoot}/lib/awk/mr.awk" \
                 -- -a "$myMrAction" \
-        | command xargs -E "" -L 1 -P 6 -x -r sh -c '
+        | command xargs -E '' -L 1 -P 1 -x -r sh -c '
                 set -e;
                 exec >> "${myLog}/mr/${$}.log";
                 exec 2>&1;

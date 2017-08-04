@@ -2,10 +2,15 @@
 
 pkg__build ()
 (
+        # readonly \
+        #         DESTDIR="${myBuild}/${PKG_NAME}" \
+        #         DISTDIR="${myCheckout}/${PKG_NAME}" \
+        #         KEYDIR="${myKey}/${PKG_NAME}";
+
         readonly \
-                DESTDIR="${myBuild}/${PKG_NAME}" \
-                DISTDIR="${myCheckout}/${PKG_NAME}" \
-                KEYDIR="${myKey}/${PKG_NAME}";
+                DESTDIR="$myBuild/$KEY_NAME" \
+                DISTDIR="$myCheckout/$KEY_NAME" \
+                KEYDIR="$myKey/$KEY_NAME";
 
         msg "DISTDIR := ${DISTDIR}"
         msg "DESTDIR := ${DESTDIR}"
@@ -119,7 +124,8 @@ pkg__install ()
 
         trap 'p=$? ; __trap ; exit $p' 1 2 3 6 9 15 EXIT
 
-        readonly DESTDIR="${myBuild}/${PKG_NAME}"
+        # readonly DESTDIR="${myBuild}/${PKG_NAME}"
+        readonly DESTDIR="$myBuild/$KEY_NAME"
         msg "DESTDIR := ${DESTDIR}"
 
         __cd_gitdir
