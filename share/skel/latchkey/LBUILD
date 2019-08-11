@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Pre-build environment configuration and checks
 src_env ()
@@ -55,4 +55,4 @@ unstow_post ()
         return 0
 }
 
-# vim: set ft=sh ts=8 sw=8 tw=0 et :
+# vim: set ft=sh :

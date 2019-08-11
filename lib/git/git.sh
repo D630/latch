@@ -151,6 +151,7 @@ esac
 gsubmodule ()
 case "$1" in
 update)
+        command git submodule sync
         command git submodule update --init --recursive
 ;;
 *)
