@@ -14,9 +14,6 @@ stow__add ()
         msg "cleaning ..."
         gclean
 
-        msg "setting rights ..."
-        rights "$DESTDIR"
-
         . "./.LBUILD"
 
         msg "invoking stow_prae() ..."
@@ -61,9 +58,6 @@ stow__delete ()
 
         msg "checking out '${PKG_VERSION}' ..."
         gcheckout "$PKG_VERSION"
-
-        msg "setting rights ..."
-        rights "$DESTDIR"
 
         . "./.LBUILD"
 
@@ -214,7 +208,6 @@ S
 
         readonly DESTDIR="${STOW_DIR}/${PKG_NAME}"
         msg "DESTDIR := ${DESTDIR}"
-        exit
 
         case "$myStowAction" in
         add|delete)
