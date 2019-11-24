@@ -17,7 +17,7 @@ if
 then
         case "$myPkgAction" in
         purge)
-                die "current version must be unstowed: '${stowedIs}'"
+                die "current stowed version must be unstowed: '${stowedIs}'"
         esac
         __plimit
 else
@@ -30,27 +30,27 @@ plimit ()
 
         case "${isInitialized}::${isPacked}::${isStowed}" in
         false::*)
-                _l="init"
+                _l="init build"
         ;;
         true::false::*)
-                _l="build install purge"
+                _l="purge build install"
                 _plimit
         ;;
         true::true::false)
-                _l="purge remove"
+                _l="purge build remove"
                 _plimit
         ;;
         true::true::true)
-                _l="purge"
+                _l="build"
                 __plimit
         esac
 
         if
-                [ "${_l:-_}" = "_" ]
+            test "${_l:-_}" = "_"
         then
-                die "alarm. something went wrong, really"
+            die "alarm. something went wrong, really"
         else
-                _l=" ${_l} build-force test "
+            _l=" $_l "
         fi
 
         msg "{${_l}}"

@@ -38,7 +38,6 @@ pkg
                         $1 := BRANCH
                         [ $2 := <commit-ish of mirror> ]
                         [ $3 := <commit-ish of latchkey> ]
-    build-force         Force a build.
     chop                Delete all installed stow packages, but the stowed one.
                         $1 := BRANCH
     init                Initialize empty stow package directory
@@ -53,10 +52,6 @@ pkg
                         versions in it.
                         $1 := BRANCH
     remove              Remove/Delete a stow package version.
-                        $1 := BRANCH
-                        [ $2 := <commit-ish of mirror> ]
-                        [ $3 := <commit-ish of latchkey> ]
-    test                Show, how a package would be configured.
                         $1 := BRANCH
                         [ $2 := <commit-ish of mirror> ]
                         [ $3 := <commit-ish of latchkey> ]

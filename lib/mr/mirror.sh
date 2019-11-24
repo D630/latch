@@ -20,12 +20,13 @@ git_mirror ()
 
 git_mirror_clone ()
 {
-        command git clone -v --mirror --recursive --progress -- "$@"
+        command git clone -v --mirror -- "$@"
 }
 
 git_mirror_update ()
 {
         command git remote update --prune
+        # command git fetch --all --prune
 }
 
 # vim: set ts=8 sw=8 tw=0 et :

@@ -5,7 +5,7 @@ case "$1" in
 add)
         gcheckout "master"
         command git checkout --orphan "$2"
-        command rm -rf -- \
+        command rm -rfv -- \
                 ./.git/index \
                 ./.git/COMMIT_EDITMSG \
                 ./.git/description \
@@ -68,9 +68,7 @@ gclean ()
 
 gclone ()
 {
-        command git clone -v \
-                --no-checkout --local --progress \
-                        --recursive -- "$1" "$2";
+        command git clone --no-checkout --local "$1" "$2";
 }
 
 gcommit ()
@@ -151,8 +149,8 @@ esac
 gsubmodule ()
 case "$1" in
 update)
-        command git submodule sync
-        command git submodule update --init --recursive
+        command git submodule sync --recursive
+        command git submodule update --init --recursive --jobs 4
 ;;
 *)
         die "unknown argument: '${1}'"
@@ -169,5 +167,10 @@ delete)
 *)
         die "unknown argument: '${1}'"
 esac
+
+gconfig ()
+{
+    command git config --local "$@"
+}
 
 # vim: set ts=8 sw=8 tw=0 et :

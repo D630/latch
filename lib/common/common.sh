@@ -7,10 +7,19 @@ action ()
 
 context ()
 {
-        . "${myRoot}/etc/context/${1}.sh" && "${1}_context";
+        if
+                test -e "${myRoot}/etc/context/${1}.sh"
+        then
+                . "${myRoot}/etc/context/${1}.sh"
+        else
+                die "context file does not exist: '${myRoot}/etc/context/${1}.sh'"
+        fi
+
+        "${1}_context"
 
         msg "useIds := ${useIds}"
-        [ "$currentId" -eq "${useIds%:*}" ] || die "currentId does not match useId: '${currentId} <> ${useIds}'";
+        [ "$currentId" -eq "${useIds%:*}" ] ||
+            die "currentId does not match useId: '${currentId} <> ${useIds}'";
 
         msg "myXstowConfig := ${myXstowConfig}"
         if
@@ -18,7 +27,6 @@ context ()
         then
                 die "myXstowConfig does not exist: '$myXstowConfig'"
         fi
-
 
         msg "STOW_DIR := ${STOW_DIR}"
         if
@@ -188,7 +196,7 @@ rights ()
 {
         # TODO
         command find "$1" -type d -exec chmod 2775 {} + &
-        command find "$1" ! -type d -exec chmod 0775 {} + &
+        command find "$1" ! -type d -exec chmod 0644 {} + &
         command chown -R "$useIds" "$1" &
         wait
 }

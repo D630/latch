@@ -214,6 +214,7 @@ S
 
         readonly DESTDIR="${STOW_DIR}/${PKG_NAME}"
         msg "DESTDIR := ${DESTDIR}"
+        exit
 
         case "$myStowAction" in
         add|delete)

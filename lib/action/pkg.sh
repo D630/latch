@@ -2,11 +2,6 @@
 
 pkg__build ()
 (
-        # readonly \
-        #         DESTDIR="${myBuild}/${PKG_NAME}" \
-        #         DISTDIR="${myCheckout}/${PKG_NAME}" \
-        #         KEYDIR="${myKey}/${PKG_NAME}";
-
         readonly \
                 DESTDIR="$myBuild/$KEY_NAME" \
                 DISTDIR="$myCheckout/$KEY_NAME" \
@@ -26,14 +21,22 @@ pkg__build ()
         export \
                 GIT_DIR="${KEYDIR}/.git" \
                 GIT_WORK_TREE="$KEYDIR";
+        gconfig --bool advice.detachedHead false
         gcheckout "$KEY_DESC"
 
-        . "${KEYDIR}/LBUILD"
+        if
+                test -e "${KEYDIR}/LBUILD"
+        then
+                . "${KEYDIR}/LBUILD"
+        else
+                die "LBUILD file not found"
+        fi
 
         cd -- "$DISTDIR"
         export \
                 GIT_DIR="${DISTDIR}/.git" \
                 GIT_WORK_TREE="$DISTDIR";
+        gconfig --bool advice.detachedHead false
         gcheckout "$DISTDIR_DESC"
         gsubmodule "update"
 
@@ -55,7 +58,7 @@ pkg__build ()
         command cp -fp -- "${KEYDIR}/LBUILD" "${DESTDIR}/.LBUILD"
         echo "$PKG_VERSION" > "${DESTDIR}/.PKG_VERSION";
         command find -H "${DESTDIR}/." \
-                \( ! -name . -a ! -name .LFILES -a ! -name .PKG_VERSION \) \
+                \( ! -name . -a ! -name .LFILES \) \
                 -prune \
                 > "${DESTDIR}/.LFILES";
 )
@@ -80,6 +83,12 @@ pkg__chop ()
                 done;
                 unregister "chop-pkg"
         };
+
+        msg "cleaning ..."
+        gclean
+
+        msg "setting rights ..."
+        rights "${STOW_DIR}/${PKG_NAME}"
 
         msg "checking out '${stowedIs}' ..."
         gcheckout "$stowedIs"
@@ -111,6 +120,21 @@ pkg__install ()
                         GIT_WORK_TREE="${STOW_DIR}/${PKG_NAME}";
         }
 
+        __checkout_stowed ()
+        {
+                msg "checkout master"
+                gcheckout "master"
+
+                msg "cleaning ..."
+                gclean
+
+                msg "setting rights ..."
+                rights "${STOW_DIR}/${PKG_NAME}"
+
+                msg "checking out '${stowedIs}' again ..."
+                gcheckout "$stowedIs"
+        }
+
         __trap ()
         {
                 __cd_gitdir
@@ -120,30 +144,40 @@ pkg__install ()
 
                 msg "cleaning ..."
                 gclean
+
+                msg "setting rights ..."
+                rights "${STOW_DIR}/${PKG_NAME}"
+
+                test "$stowedIs" = "null" || {
+                        msg "checking out '${stowedIs}' again ..."
+                        gcheckout "$stowedIs"
+                }
         }
 
-        trap 'p=$? ; __trap ; exit $p' 1 2 3 6 9 15 EXIT
-
-        # readonly DESTDIR="${myBuild}/${PKG_NAME}"
         readonly DESTDIR="$myBuild/$KEY_NAME"
         msg "DESTDIR := ${DESTDIR}"
+
+        local f
+        for f in "${DESTDIR}/.PKG_VERSION" "${DESTDIR}/.LFILES" "${DESTDIR}/.LBUILD"
+        do
+            test -e "$f" ||
+                die "a necessary build file does not exist: '$f'"
+        done
+
+        msg "comparing build pkg version with PKG_VERSION '${PKG_VERSION}' ..."
+        local p
+        IFS= read -r p < "${DESTDIR}/.PKG_VERSION";
+        test "$p" = "$PKG_VERSION" ||
+                die "build pkg version does not match PKG_VERSION: '${p} <> ${PKG_VERSION}'"
+
+        trap 'eval "__trap ; exit $?"' 1 2 3 6 9 15 EXIT
 
         __cd_gitdir
 
         msg "branching pkg version '${PKG_VERSION}'..."
         gbranch "add" "$PKG_VERSION" "add pkg version ${PKG_VERSION}"
 
-        msg "comparing build pkg version with '${PKG_VERSION}' ..."
-        local p
-        IFS= read -r p < "${DESTDIR}/.PKG_VERSION";
-        if
-                ! [ "$p" = "$PKG_VERSION" ]
-        then
-                die "the currently build package version is not the one you are going to install: '${p} <> ${PKG_VERSION}'"
-        fi
-
         msg "moving pkg files to '${STOW_DIR}/${PKG_NAME}' ..."
-        #command cp -fpR -- "${DESTDIR}"/. "${STOW_DIR}/${PKG_NAME}"
         local f
         while
                 IFS= read -r f
@@ -161,22 +195,13 @@ pkg__install ()
                 fi
         done < "${DESTDIR}/.LFILES"
 
-        trap - 1 2 3 6 9 15 EXIT
-
-        msg "setting rights ..."
-        rights "$DESTDIR"
-
         msg "committing pkg version '${PKG_VERSION}' ..."
         gcommit "commit pkg version ${PKG_VERSION}"
 
-        if
-                ! [ "$stowedIs" = "null" ]
-        then
-                msg "checking out '${stowedIs}' again ..."
-                gcheckout "$stowedIs"
-                msg "setting rights ..."
-                rights "$DESTDIR"
-        fi
+        trap - 1 2 3 6 9 15 EXIT
+
+        [ "$stowedIs" = "null" ] ||
+                __checkout_stowed
 
         msg "registering pkg version '${PKG_VERSION}' ..."
         register "pkg"
@@ -187,7 +212,7 @@ pkg__purge ()
         msg "deinitializing pkg repo '${DESTDIR}' ..."
         command rm -rf -- "$DESTDIR"
 
-        msg "unnregistering all pkgs ..."
+        msg "unregistering all pkgs ..."
         unregister "any-pkg"
 }
 
@@ -205,16 +230,16 @@ pkg__remove ()
         msg "cleaning ..."
         gclean
 
-        if
-                let "$arePacked - 1 > 0"
-        then
-                msg "setting rights ..."
-                rights "$DESTDIR"
-                msg "unregistering pkg version '${PKG_VERSION}' ..."
-                unregister "pkg"
-        else
-                pkg__purge
-        fi
+        msg "setting rights ..."
+        rights "$DESTDIR"
+
+        test "$stowedIs" = "null" || {
+                msg "checking out '${stowedIs}' again ..."
+                gcheckout "$stowedIs"
+        }
+
+        msg "unregistering pkg version '${PKG_VERSION}' ..."
+        unregister "pkg"
 )
 
 pkg__main ()
@@ -286,7 +311,6 @@ pkg__main ()
                 test -n "$myContext"
         then
                 msg "myContext := ${myContext}"
-                context "$myContext"
         else
                 die "myContext is null"
         fi
@@ -302,27 +326,21 @@ pkg__main ()
                 PKG_VERSION;
 
         case "$myPkgAction" in
-        build-force)
+        build)
                 pkg__build
         ;;
         *)
+                context "$myContext"
                 sinfo
                 plimit
                 case "$myPkgAction" in
-                chop|init|purge|remove)
+                init|purge|chop|remove)
                         readonly DESTDIR="${STOW_DIR}/${PKG_NAME}"
                         msg "DESTDIR := ${DESTDIR}"
                         "pkg__${myPkgAction}"
                 ;;
-                build)
-                        pkg__build
-                        return 0
-                ;;
                 install)
                         pkg__install
-                ;;
-                test)
-                        return 0
                 ;;
                 *)
                         die "unknown argument: '${myPkgAction}'"
