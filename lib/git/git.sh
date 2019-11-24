@@ -74,8 +74,7 @@ gcommit ()
 gget ()
 case $1 in
 	(branchCnt)
-		command git branch --list \
-		| {
+		command git branch --list | {
 				i=0;
 				while
 					IFS= read -r _ &&
@@ -95,8 +94,7 @@ case $1 in
 		if
 			test -n "$b";
 		then
-			command git branch --contains "$b" \
-			| {
+			command git branch --contains "$b" | {
 				IFS=' ' read -r _ b;
 				echo "$b";
 			};

@@ -48,8 +48,8 @@ mr__main ()
 		-f "$myMirrorList" \
 		-f "$myRoot/lib/awk/common.awk" \
 		-f "$myRoot/lib/awk/mr.awk" \
-		-- -a "$myMrAction" \
-	| command xargs -E '' -L 1 -P 4 -x -r sh -c '
+		-- -a "$myMrAction" |
+	command xargs -E '' -L 1 -P 4 -x -r sh -c '
 		set -e;
 		exec >> "${myLog}/mr/${$}.log";
 		exec 2>&1;

@@ -85,8 +85,8 @@ pkg__chop ()
 	GIT_DIR=$DESTDIR/.git;
 	GIT_WORK_TREE=$DESTDIR;
 
-	command grep -e "^$PKG_NAME|[0-9]*|[^|]*|[^|]*|$myContext|0$" "$myPkgList" \
-	| {
+	command grep \
+		-e "^$PKG_NAME|[0-9]*|[^|]*|[^|]*|$myContext|0$" "$myPkgList" | {
 		while
 			IFS='|' read -r _ _ p k _ _;
 		do
@@ -313,8 +313,7 @@ pkg__main ()
 	\msg "KEY_NAME := ${KEY_NAME:=$1}";
 
 	eval "$(
-		\linfo "${3:-$KEY_NAME}" \
-		| {
+		\linfo "${3:-$KEY_NAME}" | {
 			IFS='|' read -r _ _ myContext;
 			IFS= read -r KEY_DESC;
 			echo \

@@ -159,8 +159,8 @@ stow__main ()
 			fi;
 			command grep \
 				-e "^$PKG_NAME|[0-9]*|[^|]*|[^|]*|[^|]*|$_s\$" \
-				"$myPkgList" \
-			| command sort -t '|' -k 2nr;
+				"$myPkgList" |
+			command sort -t '|' -k 2nr;
 		);
 		if
 			test -n "$_p"
