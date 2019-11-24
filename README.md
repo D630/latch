@@ -1,8 +1,15 @@
 ##### README
 
-I am on Debian GNU/Linux (testing/sid), and I use its software repository and package management system for installing the most part of my favourite utilities. Parallel to this, I build, install and "update" source packages coming from Git repositories, what is increasingly uncomfortable and produces the need of a way to manage this all. That is why I decided to write some simple shell scripts and to use them with git and [xstow](http://xstow.sourceforge.net/) as key tools.
+I am on Debian GNU/Linux (testing/sid), and I use its software repository and
+package management system for installing the most part of my favourite
+utilities. Parallel to this, I build, install and "update" source packages
+coming from Git repositories, what is increasingly uncomfortable and produces
+the need of a way to manage this all. That is why I decided to write some
+simple shell scripts and to use them with git and
+[xstow](http://xstow.sourceforge.net/) as key tools.
 
-You need a POSIX shell + "local" builtin command to make this business work properly.
+You need a POSIX shell + "local" builtin command to make this business work
+properly.
 
 ##### USAGE
 
