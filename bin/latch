@@ -1,95 +1,93 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-set -e
-set -u
+set -e;
+set -u;
 
-if
-         exec 9<"$0";
-         ! command flock -n 9
-then
-         printf '%s\n' "latch/main/error: sorry, I am already running" 1>&2;
-         exit 1
-fi
+exec 7<"$0";
+command flock -n 7 || {
+	 echo 'latch/main/error: sorry, I am already running' 1>&2;
+	 exit 1
+};
 
-command umask 002
-
-_a= \
-myAction= \
-myArgs= \
-myBuild= \
-myCheckout= \
-myKey= \
-myKeyRing= \
-myLog= \
-myMirror= \
-myMirrorList= \
-myPkgList= \
-myRoot=;
-
-myRoot="$(
-        rl="$(command readlink -fn -- "$0")";
-        command dirname -- "$rl"
-)"
-myRoot="${myRoot%/bin}"
-
-readonly \
-        myBuild="${myRoot}/tmp/build" \
-        myCheckout="${myRoot}/tmp/checkout" \
-        myKey="${myRoot}/tmp/key" \
-        myKeyRing="${myRoot}/var/ring" \
-        myLog="${myRoot}/var/log" \
-        myMirror="${myRoot}/var/mirror" \
-        myMirrorList="${myRoot}/var/mirror.list" \
-        myPkgList="${myRoot}/var/pkg.list" \
-        myRoot;
+umask 002;
 
 export \
-        myBuild \
-        myCheckout \
-        myKey \
-        myKeyRing \
-        myLog \
-        myMirror \
-        myMirrorList \
-        myPkgList \
-        myRoot;
+	myBuild \
+	myCheckout \
+	myKey \
+	myKeyRing \
+	myLog \
+	myMirror \
+	myMirrorList \
+	myPkgList \
+	myRoot;
 
-. "${myRoot}/lib/setup.sh"
+myRoot=$(
+	rl="$(command readlink -fn -- "$0")";
+	command dirname -- "$rl";
+);
+myRoot=${myRoot%/bin};
 
-msg "myRoot := ${myRoot}"
-msg "myBuild := ${myBuild}"
-msg "myCheckout := ${myCheckout}"
-msg "myKey := ${myKey}"
-msg "myKeyRing := ${myKeyRing}"
-msg "myLog := ${myLog}"
-msg "myMirror := ${myMirror}"
+myBuild=$myRoot/tmp/build;
+myCheckout=$myRoot/tmp/checkout;
+myKey=$myRoot/tmp/key;
+myKeyRing=$myRoot/var/ring;
+myLog=$myRoot/var/log;
+myMirror=$myRoot/var/mirror;
+myMirrorList=$myRoot/var/mirror.list;
+myPkgList=$myRoot/var/pkg.list;
 
-for _a
+readonly \
+	myBuild \
+	myCheckout \
+	myKey \
+	myKeyRing \
+	myLog \
+	myMirror \
+	myMirrorList \
+	myPkgList \
+	myRoot;
+
+. "$myRoot/lib/setup.sh";
+
+\msg "myRoot := $myRoot";
+\msg "myBuild := $myBuild";
+\msg "myCheckout := $myCheckout";
+\msg "myKey := $myKey";
+\msg "myKeyRing := $myKeyRing";
+\msg "myLog := $myLog";
+\msg "myMirror := $myMirror";
+
+_a=;
+myAction=;
+myArgs=;
+
+for _a;
 do
-        case "$_a" in
-        forge|mr|pkg|rehash|stow)
-                readonly myAction="$_a"
-                msg "myAction := ${myAction}"
-                shift 1
-        ;;
-        *)
-                myArgs="${myArgs:+${myArgs} }'${_a}'"
-                shift 1
-        esac
-done
+	case $_a in
+		(forge|mr|pkg|rehash|stow)
+			myAction=$_a;
+			readonly myAction;
+			\msg "myAction := $myAction";
+			shift 1;;
+		(*)
+			myArgs="${myArgs:+$myArgs }'$_a'";
+			shift 1;;
+	esac;
+done;
 
-: "${myArgs:={\}}"
-msg "myArgs := ${myArgs}"
-readonly myArgs
+: "${myArgs:={\}}";
+\msg "myArgs := $myArgs";
+readonly myArgs;
 
-command mkdir -p \
-        "$myBuild" \
-        "$myCheckout" \
-        "$myKey" \
-        "$myKeyRing" \
-        "$myLog" \
-        "$myMirror";
+command mkdir -p -m 755 \
+	"$myBuild" \
+	"$myCheckout" \
+	"$myKey" \
+	"$myKeyRing" \
+	"$myLog" \
+	"$myMirror";
 
-action "$myAction"
+\act "$myAction";
 
-# vim: set ft=sh ts=8 sw=8 tw=0 et :
+# vim: set ft=sh :

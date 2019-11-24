@@ -1,8 +1,9 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-action ()
+act ()
 {
-        . "${myRoot}/lib/action/${1}.sh" && "${1}__main";
+	. "$myRoot/lib/action/$1.sh" &&
+		"${1}__main";
 }
 
 context ()
@@ -156,7 +157,7 @@ minfo ()
 
 msg ()
 {
-        printf "latch/${myAction:-main}# %s\n" "$*" 1>&2;
+	printf "latch/${myAction:-main}# %s\n" "$*" 1>&2;
 }
 
 pname ()
@@ -303,4 +304,4 @@ S
         command chown "$myIds" "$myPkgList"
 }
 
-# vim: set ts=8 sw=8 tw=0 et :
+# vim: set ft=sh :
