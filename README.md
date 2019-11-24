@@ -89,16 +89,18 @@ Arguments
 ###### INSTALL
 
 ```sh
-sudo mkdir -p /home/{latch,stow} /usr/local/stow
-sudo chown -R "${USER}:${USER}" /home/{latch,stow}
-sudo chown -R root:staff /usr/local/stow
-git clone "https://github.com/D630/latch" /home/latch
-git clone --mirror "https://github.com/D630/latch-keys" /home/latch/var/ring/.git
-cd /home/latch/var/ring
-git config --local --bool core.bare false
-git checkout master
-cd /home/latch
-git clone "https://github.com/D630/latch-config" etc
+sudo mkdir -p /home/{latch,stow} /usr/local/stow;
+sudo chown -R "$USER:$USER" /home/{latch,stow};
+sudo chown -R root:staff /usr/local/stow:
+
+git clone https://github.com/D630/latch /home/latch;
+
+git clone https://github.com/D630/latch-config /home/latch/etc;
+
+git clone --mirror https://github.com/D630/latch-keys /home/latch/var/ring/.git;
+cd /home/latch/var/ring;
+git config --local --bool core.bare false;
+git checkout master;
 ```
 
 ###### EXAMPLES
