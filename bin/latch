@@ -62,7 +62,7 @@ _a=;
 myAction=;
 myArgs=;
 
-for _a;
+for _a in "$@";
 do
 	case $_a in
 		(forge|mr|pkg|rehash|stow)
