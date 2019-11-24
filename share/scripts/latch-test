@@ -1,8 +1,8 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-cd /home/latch
+cd /home/latch;
 
-./bin/latch pkg test "$1" 2>&1 \
-| column -t;
+./bin/latch pkg test "$1" 2>&1 |
+    column -t;
 
-# vim: set ts=8 sw=8 tw=0 et :
+# vim: set ft=sh :
