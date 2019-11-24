@@ -55,7 +55,7 @@ mr__main ()
 		exec 2>&1;
 		echo "latch/mr: processing $1 ...";
 		. "$myRoot/lib/setup.sh";
-		import mr;
+		\import mr;
 		# WORKTREE=$myCheckout/${1%.git};
 		MIRROR=$myMirror/$1;
 		command mkdir -p "$MIRROR" # "$WORKTREE";
