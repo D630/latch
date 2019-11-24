@@ -32,7 +32,7 @@ context ()
 
 	\msg "STOW_TARGET := $STOW_TARGET";
 	test -d "$STOW_TARGET" ||
-		\die "STOW_TARGET is not a directory: '$STOW_TARGET'":
+		\die "STOW_TARGET is not a directory: '$STOW_TARGET'";
 
 	readonly \
 		STOW_DIR \
