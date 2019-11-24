@@ -1,351 +1,376 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 pkg__build ()
 (
-        readonly \
-                DESTDIR="$myBuild/$KEY_NAME" \
-                DISTDIR="$myCheckout/$KEY_NAME" \
-                KEYDIR="$myKey/$KEY_NAME";
+	DESTDIR=$myBuild/$KEY_NAME;
+	DISTDIR=$myCheckout/$KEY_NAME;
+	KEYDIR=$myKey/$KEY_NAME;
 
-        msg "DISTDIR := ${DISTDIR}"
-        msg "DESTDIR := ${DESTDIR}"
-        msg "KEYDIR := ${KEYDIR}"
+	readonly \
+		DESTDIR \
+		DISTDIR \
+		KEYDIR;
 
-        command rm -fr "$DESTDIR" "$DISTDIR" "$KEYDIR"
-        command mkdir -p "$DESTDIR"
+	\msg "DISTDIR := $DISTDIR";
+	\msg "DESTDIR := $DESTDIR";
+	\msg "KEYDIR := $KEYDIR";
 
-        gclone "${myMirror}/${KEY_NAME}.git" "$DISTDIR";
-        gclone "$myKeyRing" "$KEYDIR";
+	command rm -fr "$DESTDIR" "$DISTDIR" "$KEYDIR";
+	command mkdir -p "$DESTDIR";
 
-        cd -- "$KEYDIR"
-        export \
-                GIT_DIR="${KEYDIR}/.git" \
-                GIT_WORK_TREE="$KEYDIR";
-        gconfig --bool advice.detachedHead false
-        gcheckout "$KEY_DESC"
+	\gclone "$myMirror/$KEY_NAME.git" "$DISTDIR";
+	\gclone "$myKeyRing" "$KEYDIR";
 
-        if
-                test -e "${KEYDIR}/LBUILD"
-        then
-                . "${KEYDIR}/LBUILD"
-        else
-                die "LBUILD file not found"
-        fi
+	cd -- "$KEYDIR";
+	export \
+		GIT_DIR \
+		GIT_WORK_TREE;
+	GIT_DIR=$KEYDIR/.git;
+	GIT_WORK_TREE=$KEYDIR;
 
-        cd -- "$DISTDIR"
-        export \
-                GIT_DIR="${DISTDIR}/.git" \
-                GIT_WORK_TREE="$DISTDIR";
-        gconfig --bool advice.detachedHead false
-        gcheckout "$DISTDIR_DESC"
-        gsubmodule "update"
+	\gconfig --bool advice.detachedHead false;
+	\gcheckout "$KEY_DESC";
 
-        (
-                msg "invoking src_env() ..."
-                src_env
-                msg "invoking src_prepare() ..."
-                ( src_prepare )
-                msg "invoking src_build() ..."
-                ( src_build )
-                msg "invoking src_check() ..."
-                ( src_check )
-                msg "invoking src_install() ..."
-                ( src_install )
-        )
+	if
+		test -e "$KEYDIR/LBUILD";
+	then
+		. "$KEYDIR/LBUILD";
+	else
+		\die "LBUILD file not found";
+	fi;
 
-        cd -- "$DESTDIR"
+	cd -- "$DISTDIR";
+	export \
+		GIT_DIR \
+		GIT_WORK_TREE;
+	GIT_DIR=$DISTDIR/.git;
+	GIT_WORK_TREE=$DISTDIR;
 
-        command cp -fp -- "${KEYDIR}/LBUILD" "${DESTDIR}/.LBUILD"
-        echo "$PKG_VERSION" > "${DESTDIR}/.PKG_VERSION";
-        command find -H "${DESTDIR}/." \
-                \( ! -name . -a ! -name .LFILES \) \
-                -prune \
-                > "${DESTDIR}/.LFILES";
+	\gconfig --bool advice.detachedHead false;
+	\gcheckout "$DISTDIR_DESC";
+	\gsubmodule update;
+
+	(
+		\msg "invoking src_env() ...";
+		\src_env;
+		\msg "invoking src_prepare() ...";
+		(\src_prepare);
+		\msg "invoking src_build() ...";
+		(\src_build);
+		\msg "invoking src_check() ...";
+		(\src_check);
+		\msg "invoking src_install() ...";
+		(\src_install);
+	);
+
+	cd -- "$DESTDIR";
+
+	command cp -fp -- "$KEYDIR/LBUILD" "$DESTDIR/.LBUILD";
+	echo "$PKG_VERSION" > "$DESTDIR/.PKG_VERSION";
+	command find -H "$DESTDIR/." \
+		\( ! -name . -a ! -name .LFILES \) \
+		-prune \
+		> "$DESTDIR/.LFILES";
 )
 
 pkg__chop ()
 (
-        local _b
+	local _b;
 
-        cd -- "$DESTDIR"
+	cd -- "$DESTDIR";
 
-        export \
-                GIT_DIR="${DESTDIR}/.git" \
-                GIT_WORK_TREE="$DESTDIR";
+	export \
+		GIT_DIR \
+		GIT_WORK_TREE;
+	GIT_DIR=$DESTDIR/.git;
+	GIT_WORK_TREE=$DESTDIR;
 
-        command grep -e "^${PKG_NAME}|[0-9]*|[^|]*|[^|]*|${myContext}|0$" "$myPkgList" \
-        | {
-                while
-                        IFS='|' read -r _ _ p k _ _;
-                do
-                        msg "deleting '${p}/${k}' ..."
-                        gbranch "delete" "${p}/${k}"
-                done;
-                unregister "chop-pkg"
-        };
+	command grep -e "^$PKG_NAME|[0-9]*|[^|]*|[^|]*|$myContext|0$" "$myPkgList" \
+	| {
+		while
+			IFS='|' read -r _ _ p k _ _;
+		do
+			\msg "deleting '$p/$k' ...";
+			\gbranch "delete" "$p/$k";
+		done;
+		\unregister chop-pkg;
+	};
 
-        msg "cleaning ..."
-        gclean
+	\msg "cleaning ...";
+	\gclean;
 
-        msg "setting rights ..."
-        rights "${STOW_DIR}/${PKG_NAME}"
+	\msg "setting rights ...";
+	\rights "$STOW_DIR/$PKG_NAME";
 
-        msg "checking out '${stowedIs}' ..."
-        gcheckout "$stowedIs"
+	\msg "checking out '$stowedIs' ...";
+	\gcheckout "$stowedIs";
 )
 
 pkg__init ()
 (
-        cd -- "$DESTDIR"
+	cd -- "$DESTDIR";
 
-        export \
-                GIT_DIR="${DESTDIR}/.git" \
-                GIT_WORK_TREE="$DESTDIR";
+	export \
+		GIT_DIR \
+		GIT_WORK_TREE;
+	GIT_DIR=$DESTDIR/.git;
+	GIT_WORK_TREE=$DESTDIR;
 
-        msg "initializing pkg repository ..."
-        ginit "init"
+	\msg "initializing pkg repository ...";
+	\ginit init;
 
-        msg "setting rights ..."
-        rights "$DESTDIR"
+	\msg "setting rights ...";
+	\rights "$DESTDIR";
 )
 
 pkg__install ()
 (
-        __cd_gitdir ()
-        {
-                cd -- "${STOW_DIR}/${PKG_NAME}"
+	__cd_gitdir ()
+	{
+		cd -- "$STOW_DIR/$PKG_NAME";
 
-                export \
-                        GIT_DIR="${STOW_DIR}/${PKG_NAME}/.git" \
-                        GIT_WORK_TREE="${STOW_DIR}/${PKG_NAME}";
-        }
+		export \
+			GIT_DIR \
+			GIT_WORK_TREE;
 
-        __checkout_stowed ()
-        {
-                msg "checkout master"
-                gcheckout "master"
+		GIT_DIR=$STOW_DIR/$PKG_NAME/.git;
+		GIT_WORK_TREE=$STOW_DIR/$PKG_NAME;
+	}
 
-                msg "cleaning ..."
-                gclean
+	__checkout_stowed ()
+	{
+		\msg "checkout master";
+		\gcheckout "master";
 
-                msg "setting rights ..."
-                rights "${STOW_DIR}/${PKG_NAME}"
+		\msg "cleaning ...";
+		\gclean;
 
-                msg "checking out '${stowedIs}' again ..."
-                gcheckout "$stowedIs"
-        }
+		\msg "setting rights ...";
+		\rights "$STOW_DIR/$PKG_NAME";
 
-        __trap ()
-        {
-                __cd_gitdir
-                msg "Rolling back ..."
-                msg "deleting pkg version '${PKG_VERSION}' ..."
-                gbranch "delete" "$PKG_VERSION"
+		\msg "checking out '$stowedIs' again ...";
+		\gcheckout "$stowedIs";
+	}
 
-                msg "cleaning ..."
-                gclean
+	__trap ()
+	{
+		\__cd_gitdir;
+		\msg "Rolling back ...";
+		\msg "deleting pkg version '$PKG_VERSION' ...";
+		\gbranch "delete" "$PKG_VERSION";
 
-                msg "setting rights ..."
-                rights "${STOW_DIR}/${PKG_NAME}"
+		\msg "cleaning ...";
+		\gclean;
 
-                test "$stowedIs" = "null" || {
-                        msg "checking out '${stowedIs}' again ..."
-                        gcheckout "$stowedIs"
-                }
-        }
+		\msg "setting rights ...";
+		\rights "$STOW_DIR/$PKG_NAME";
 
-        readonly DESTDIR="$myBuild/$KEY_NAME"
-        msg "DESTDIR := ${DESTDIR}"
+		if
+			test "$stowedIs" = null;
+		then
+			:;
+		else
+			\msg "checking out '$stowedIs' again ...";
+			\gcheckout "$stowedIs";
+		fi;
+	}
 
-        local f
-        for f in "${DESTDIR}/.PKG_VERSION" "${DESTDIR}/.LFILES" "${DESTDIR}/.LBUILD"
-        do
-            test -e "$f" ||
-                die "a necessary build file does not exist: '$f'"
-        done
+	DESTDIR=$myBuild/$KEY_NAME;
+	readonly DESTDIR;
+	\msg "DESTDIR := $DESTDIR";
 
-        msg "comparing build pkg version with PKG_VERSION '${PKG_VERSION}' ..."
-        local p
-        IFS= read -r p < "${DESTDIR}/.PKG_VERSION";
-        test "$p" = "$PKG_VERSION" ||
-                die "build pkg version does not match PKG_VERSION: '${p} <> ${PKG_VERSION}'"
+	local f;
+	for f in "$DESTDIR/.PKG_VERSION" "$DESTDIR/.LFILES" "$DESTDIR/.LBUILD";
+	do
+		test -e "$f" ||
+			\die "a necessary build file does not exist: '$f'";
+	done;
 
-        trap 'eval "__trap ; exit $?"' 1 2 3 6 9 15 EXIT
+	\msg "comparing build pkg version with PKG_VERSION '$PKG_VERSION' ...";
+	local p;
+	IFS= read -r p < "$DESTDIR/.PKG_VERSION";
+	test "$p" = "$PKG_VERSION" ||
+		\die "build pkg version does not match PKG_VERSION: '$p <> $PKG_VERSION'";
 
-        __cd_gitdir
+	trap 'eval "\__trap ; exit $?"' 1 2 3 6 9 15 EXIT;
 
-        msg "branching pkg version '${PKG_VERSION}'..."
-        gbranch "add" "$PKG_VERSION" "add pkg version ${PKG_VERSION}"
+	\__cd_gitdir;
 
-        msg "moving pkg files to '${STOW_DIR}/${PKG_NAME}' ..."
-        local f
-        while
-                IFS= read -r f
-        do
-                if
-                        test -d "$f"
-                then
-                        command cp -fpR "${f}/." "${STOW_DIR}/${PKG_NAME}/${f##*/}"
-                elif
-                        test -f "$f"
-                then
-                        command cp -fp "$f" "${STOW_DIR}/${PKG_NAME}/${f##*/}"
-                else
-                        die "cannot stat file: '${f}'"
-                fi
-        done < "${DESTDIR}/.LFILES"
+	\msg "branching pkg version '$PKG_VERSION'...";
+	\gbranch "add" "$PKG_VERSION" "add pkg version $PKG_VERSION";
 
-        msg "committing pkg version '${PKG_VERSION}' ..."
-        gcommit "commit pkg version ${PKG_VERSION}"
+	\msg "moving pkg files to '$STOW_DIR/$PKG_NAME' ...";
+	local f;
+	while
+		IFS= read -r f;
+	do
+		if
+			test -d "$f";
+		then
+			command cp -fpR "$f/." "$STOW_DIR/$PKG_NAME/${f##*/}";
+		elif
+			test -f "$f";
+		then
+			command cp -fp "$f" "$STOW_DIR/$PKG_NAME/${f##*/}";
+		else
+			\die "cannot stat file: '$f'";
+		fi;
+	done < "$DESTDIR/.LFILES";
 
-        trap - 1 2 3 6 9 15 EXIT
+	\msg "committing pkg version '$PKG_VERSION' ...";
+	\gcommit "commit pkg version $PKG_VERSION";
 
-        [ "$stowedIs" = "null" ] ||
-                __checkout_stowed
+	trap - 1 2 3 6 9 15 EXIT;
 
-        msg "registering pkg version '${PKG_VERSION}' ..."
-        register "pkg"
+	test "$stowedIs" = null ||
+		\__checkout_stowed;
+
+	\msg "registering pkg version '$PKG_VERSION' ...";
+	\register pkg;
 )
 
 pkg__purge ()
 {
-        msg "deinitializing pkg repo '${DESTDIR}' ..."
-        command rm -rf -- "$DESTDIR"
+	\msg "deinitializing pkg repo '$DESTDIR' ...";
+	command rm -rf -- "$DESTDIR";
 
-        msg "unregistering all pkgs ..."
-        unregister "any-pkg"
+	\msg "unregistering all pkgs ...";
+	\unregister any-pkg;
 }
 
 pkg__remove ()
 (
-        cd -- "$DESTDIR"
+	cd -- "$DESTDIR";
 
-        export \
-                GIT_DIR="${DESTDIR}/.git" \
-                GIT_WORK_TREE="$DESTDIR";
+	export \
+		GIT_DIR \
+		GIT_WORK_TREE;
+	GIT_DIR=$DESTDIR/.git;
+	GIT_WORK_TREE=$DESTDIR;
 
-        msg "deleting pkg version '${PKG_VERSION}' ..."
-        gbranch "delete" "$PKG_VERSION"
+	\msg "deleting pkg version '$PKG_VERSION' ...";
+	\gbranch "delete" "$PKG_VERSION";
 
-        msg "cleaning ..."
-        gclean
+	\msg "cleaning ...";
+	\gclean;
 
-        msg "setting rights ..."
-        rights "$DESTDIR"
+	\msg "setting rights ...";
+	\rights "$DESTDIR";
 
-        test "$stowedIs" = "null" || {
-                msg "checking out '${stowedIs}' again ..."
-                gcheckout "$stowedIs"
-        }
+	test "$stowedIs" = null || {
+		\msg "checking out '$stowedIs' again ...";
+		\gcheckout "$stowedIs";
+	};
 
-        msg "unregistering pkg version '${PKG_VERSION}' ..."
-        unregister "pkg"
+	\msg "unregistering pkg version '$PKG_VERSION' ...";
+	\unregister pkg;
 )
 
 pkg__main ()
 {
-        src_build       () { return 0 ; }
-        src_check       () { return 0 ; }
-        src_env         () { return 0 ; }
-        src_install     () { return 0 ; }
-        src_prepare     () { return 0 ; }
+	src_build		() { return 0 ; };
+	src_check		() { return 0 ; };
+	src_env			() { return 0 ; };
+	src_install		() { return 0 ; };
+	src_prepare		() { return 0 ; };
 
-        DESTDIR= \
-        DISTDIR= \
-        DISTDIR_DESC= \
-        KEYDIR= \
-        KEY_DESC= \
-        KEY_NAME= \
-        PKG_NAME= \
-        PKG_VERSION= \
-        STOW_DIR= \
-        STOW_TARGET= \
-        arePacked=0 \
-        currentBranch="null" \
-        currentId= \
-        isInitialized="false" \
-        isPacked="false" \
-        isStowed="false" \
-        myContext= \
-        myHostname= \
-        myIds= \
-        myPkgAction= \
-        myUser= \
-        myXstowConfig= \
-        stowedIs="null" \
-        useIds=;
+	DESTDIR=;
+	DISTDIR=;
+	DISTDIR_DESC=;
+	KEYDIR=;
+	KEY_DESC=;
+	KEY_NAME=;
+	PKG_NAME=;
+	PKG_VERSION=;
+	STOW_DIR=;
+	STOW_TARGET=;
+	arePacked=0;
+	currentBranch=null;
+	currentId=;
+	isInitialized=false;
+	isPacked=false;
+	isStowed=false;
+	myContext=;
+	myHostname=;
+	myIds=;
+	myPkgAction=;
+	myUser=;
+	myXstowConfig=;
+	stowedIs=null;
+	useIds=;
 
-        import git pkg
+	\import git pkg;
 
-        eval set -- "$myArgs"
+	eval set -- "$myArgs";
 
-        readonly myPkgAction="$1"
-        shift 1
-        msg "myPkgAction := ${myPkgAction}"
+	myPkgAction=$1;
+	readonly myPkgAction;
+	shift 1;
+	\msg "myPkgAction := $myPkgAction";
 
-        msg "myPkgList := ${myPkgList}"
-        env
-        msg "KEY_NAME := ${KEY_NAME:=$1}"
+	\msg "myPkgList := $myPkgList";
+	\env;
+	\msg "KEY_NAME := ${KEY_NAME:=$1}";
 
-        eval "$(
-                linfo "${3:-$KEY_NAME}" \
-                | {
-                        IFS='|' read -r _ _ myContext;
-                        IFS= read -r KEY_DESC;
-                        echo myContext="$myContext" KEY_DESC="$KEY_DESC"
-                }
-        )"
-        msg "KEY_DESC := ${KEY_DESC:?}"
+	eval "$(
+		\linfo "${3:-$KEY_NAME}" \
+		| {
+			IFS='|' read -r _ _ myContext;
+			IFS= read -r KEY_DESC;
+			echo \
+				"myContext=$myContext" \
+				"KEY_DESC=$KEY_DESC";
+		};
+	)";
+	\msg "KEY_DESC := ${KEY_DESC:?}";
 
-        DISTDIR_DESC="$(minfo "${2:-HEAD}")"
-        msg "DISTDIR_DESC := ${DISTDIR_DESC:?}"
+	DISTDIR_DESC="$(minfo "${2:-HEAD}")";
+	\msg "DISTDIR_DESC := ${DISTDIR_DESC:?}";
 
-        readonly \
-                DISTDIR_DESC \
-                KEY_DESC \
-                KEY_NAME \
-                myContext \
-                myPkgAction;
+	readonly \
+		DISTDIR_DESC \
+		KEY_DESC \
+		KEY_NAME \
+		myContext \
+		myPkgAction;
 
-        if
-                test -n "$myContext"
-        then
-                msg "myContext := ${myContext}"
-        else
-                die "myContext is null"
-        fi
+	if
+		test -n "$myContext";
+	then
+		\msg "myContext := $myContext";
+	else
+		\die "myContext is null";
+	fi;
 
-        PKG_NAME="$(pname "$KEY_NAME")" \
-        PKG_VERSION="${DISTDIR_DESC}/${KEY_DESC}"
+	PKG_NAME=$(\pname "$KEY_NAME");
+	PKG_VERSION=$DISTDIR_DESC/$KEY_DESC;
 
-        msg "PKG_NAME := ${PKG_NAME}"
-        msg "PKG_VERSION := ${PKG_VERSION}"
+	\msg "PKG_NAME := $PKG_NAME";
+	\msg "PKG_VERSION := $PKG_VERSION";
 
-        readonly \
-                PKG_NAME \
-                PKG_VERSION;
+	readonly \
+		PKG_NAME \
+		PKG_VERSION;
 
-        case "$myPkgAction" in
-        build)
-                pkg__build
-        ;;
-        *)
-                context "$myContext"
-                sinfo
-                plimit
-                case "$myPkgAction" in
-                init|purge|chop|remove)
-                        readonly DESTDIR="${STOW_DIR}/${PKG_NAME}"
-                        msg "DESTDIR := ${DESTDIR}"
-                        "pkg__${myPkgAction}"
-                ;;
-                install)
-                        pkg__install
-                ;;
-                *)
-                        die "unknown argument: '${myPkgAction}'"
-                esac
-        esac
+	case $myPkgAction in
+		(build)
+			\pkg__build;;
+		(*)
+			\context "$myContext";
+			\sinfo;
+			\plimit;
+			case $myPkgAction in
+				(init|purge|chop|remove)
+					DESTDIR=$STOW_DIR/$PKG_NAME;
+					readonly DESTDIR;
+					\msg "DESTDIR := $DESTDIR";
+					"pkg__$myPkgAction";;
+				(install)
+					\pkg__install;;
+				(*)
+					\die "unknown argument: '$myPkgAction'";;
+			esac;
+	esac;
 }
 
-# vim: set ts=8 sw=8 tw=0 et :
+# vim: set ft=sh :

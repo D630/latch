@@ -3,17 +3,22 @@
 __plimit ()
 {
 	test "$arePacked" -gt 1 &&
-		_l="$_l chop";
+		_l="$_l chop" ||
+		:;
 }
 
 _plimit () {
-	test "$stowedIs" = "null" || {
+	if
+		test "$stowedIs" != null;
+	then
 		case $myPkgAction in
 			(purge)
 				\die "current stowed version must be unstowed: '$stowedIs'";;
 		esac;
 		\__plimit;
-	};
+	else
+		:;
+	fi;
 }
 
 plimit ()
