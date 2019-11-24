@@ -27,7 +27,7 @@ function printConfig(    _) {
 	printf("#!/usr/bin/awk -f\n\nBEGIN {\n\tFS = \" \";\n\tRS = \"\\n\";\n\tSUBSEP = \"\\034\";\n\tsplit(\"\", _Mirrors);\n\tsplit(\"\", _Vcs);\n\n") > myMirrorList;
 	printVcs();
 	printMirrors();
-	printf("# vim: set ts=8 sw=8 tw=0 et :\n") >> myMirrorList;
+	printf("# vim: set ft=awk :\n") >> myMirrorList;
 
 	close(myMirrorList)
 }
@@ -51,9 +51,9 @@ function printMirrors(    _c, _i, _m, c, i, m) {
 			if (match(c, "^" m SUBSEP)) {
 				split(c, _c, SUBSEP);
 				if (i == _m && _i == Mirrors[m]) {
-					printf("\t\t\"\t%s:\t%s\" \\\n", _c[2], Config[c]) >> myMirrorList
+					printf("\t\t\"  %s:\t%s\" \\\n", _c[2], Config[c]) >> myMirrorList
 				} else {
-					printf("\t\t\"\t%s:\t%s\",\n", _c[2], Config[c]) >> myMirrorList
+					printf("\t\t\"  %s:\t%s\",\n", _c[2], Config[c]) >> myMirrorList
 				};
 				_i++
 			}
