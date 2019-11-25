@@ -140,7 +140,7 @@ pkg__install ()
 	__checkout_stowed ()
 	{
 		\msg "checkout master";
-		\gcheckout "master";
+		\gcheckout master;
 
 		\msg "cleaning ...";
 		\gclean;
