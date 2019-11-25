@@ -65,8 +65,8 @@ gclone ()
 
 gcommit ()
 {
-	command git add -f -A
-	command git commit -m "$1"
+	command git add -f -A;
+	command git commit -m "$1";
 	command git repack -a -d &&
 		command git gc --prune;
 }
@@ -75,14 +75,13 @@ gget ()
 case $1 in
 	(branchCnt)
 		command git branch --list | {
-			i=0;
+			i=-1;
 			while
-				IFS= read -r _ &&
-					: "$((i+=1))";
+				IFS= read -r _;
 			do
-				:;
+				: "$((i+=1))";
 			done;
-			printf '%d\n' "$((i - 1))";
+			echo "$i";
 		};;
 	(currentBranch)
 		command git rev-parse --abbrev-ref HEAD;;
