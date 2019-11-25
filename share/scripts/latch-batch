@@ -43,8 +43,7 @@ case $action in
 			do
 				../../bin/latch pkg "$action" "$n";
 			done;
-		};
-	;;
+		};;
 	(add|delete)
 		cd -- "/home/latch/var";
 		grep -F $expr ./pkg.list |
@@ -59,7 +58,7 @@ case $action in
 		};;
 	(*)
 		echo noop 1>&2;
-		exit 1;
+		exit 1;;
 esac;
 
 # vim: set ft=sh :
