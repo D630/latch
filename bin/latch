@@ -6,7 +6,7 @@ set -u;
 exec 7<"$0";
 command flock -n 7 || {
 	 echo 'latch/main/error: sorry, I am already running' 1>&2;
-	 exit 1
+	 exit 1;
 };
 
 umask 002;
