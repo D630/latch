@@ -91,7 +91,7 @@ pkg__chop ()
 			IFS='|' read -r _ _ p k _ _;
 		do
 			\msg "deleting '$p/$k' ...";
-			\gbranch "delete" "$p/$k";
+			\gbranch delete "$p/$k";
 		done;
 		\unregister chop-pkg;
 	};
@@ -157,7 +157,7 @@ pkg__install ()
 		\__cd_gitdir;
 		\msg "Rolling back ...";
 		\msg "deleting pkg version '$PKG_VERSION' ...";
-		\gbranch "delete" "$PKG_VERSION";
+		\gbranch delete "$PKG_VERSION";
 
 		\msg "cleaning ...";
 		\gclean;
@@ -249,7 +249,7 @@ pkg__remove ()
 	GIT_WORK_TREE=$DESTDIR;
 
 	\msg "deleting pkg version '$PKG_VERSION' ...";
-	\gbranch "delete" "$PKG_VERSION";
+	\gbranch delete "$PKG_VERSION";
 
 	\msg "cleaning ...";
 	\gclean;
