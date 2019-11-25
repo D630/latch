@@ -98,7 +98,7 @@ Arguments
 ```sh
 sudo mkdir -p /home/{latch,stow} /usr/local/stow;
 sudo chown -R "$USER:$USER" /home/{latch,stow};
-sudo chown -R root:staff /usr/local/stow:
+sudo chown -R root:staff /usr/local/stow;
 
 git clone https://github.com/D630/latch /home/latch;
 
