@@ -48,6 +48,7 @@ readonly \
 	myPkgList \
 	myRoot;
 
+# shellcheck source=../lib/setup.sh
 . "$myRoot/lib/setup.sh";
 
 \msg "myRoot := $myRoot";

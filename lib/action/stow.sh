@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# shellcheck disable=SC2164
+# shellcheck disable=SC2030
+# shellcheck disable=SC2031
+
 stow__add ()
 (
 	cd -- "$DESTDIR";
@@ -16,6 +20,7 @@ stow__add ()
 	\msg "cleaning ...";
 	\gclean;
 
+	# shellcheck source=/dev/null
 	. "./.LBUILD";
 
 	\msg "invoking stow_prae() ...";
@@ -63,6 +68,7 @@ stow__delete ()
 	\msg "checking out '$PKG_VERSION' ...";
 	\gcheckout "$PKG_VERSION";
 
+	# shellcheck source=/dev/null
 	. "./.LBUILD";
 
 	\msg "invoking unstow_prae() ...";
@@ -97,6 +103,7 @@ stow__delete ()
 	\unregister stow;
 )
 
+# shellcheck disable=SC2154
 stow__main ()
 {
 	stow_post		() { return 0 ; };
@@ -104,26 +111,27 @@ stow__main ()
 	unstow_post		() { return 0 ; };
 	unstow_prae		() { return 0 ; };
 
-	DISTDIR_DESC=;
-	KEY_DESC=;
-	KEY_NAME=;
-	PKG_NAME=;
-	PKG_VERSION=;
-	STOW_DIR=;
-	STOW_TARGET=;
-	arePacked=0;
-	currentBranch=null;
-	currentId=;
-	isInitialized=false;
-	isPacked=false;
-	isStowed=false;
-	myContext=;
-	myHostname=;
-	myIds=;
-	myStowAction=;
-	myUser=;
-	myXstowConfig=;
-	stowedIs=null;
+	# shellcheck disable=SC2034 disable=1007
+	DISTDIR_DESC= \
+	KEY_DESC= \
+	KEY_NAME= \
+	PKG_NAME= \
+	PKG_VERSION= \
+	STOW_DIR= \
+	STOW_TARGET= \
+	arePacked=0 \
+	currentBranch=null \
+	currentId= \
+	isInitialized=false \
+	isPacked=false \
+	isStowed=false \
+	myContext= \
+	myHostname= \
+	myIds= \
+	myStowAction= \
+	myUser= \
+	myXstowConfig= \
+	stowedIs=null \
 	useIds=;
 
 	\import git stow;

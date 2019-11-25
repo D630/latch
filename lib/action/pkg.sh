@@ -1,5 +1,10 @@
 #!/bin/sh
 
+# shellcheck disable=SC2030
+# shellcheck disable=SC2031
+# shellcheck disable=SC2154
+# shellcheck disable=SC2164
+
 pkg__build ()
 (
 	DESTDIR=$myBuild/$KEY_NAME;
@@ -34,6 +39,7 @@ pkg__build ()
 	if
 		test -e "$KEYDIR/LBUILD";
 	then
+		# shellcheck source=/dev/null
 		. "$KEYDIR/LBUILD";
 	else
 		\die "LBUILD file not found";
@@ -75,8 +81,6 @@ pkg__build ()
 
 pkg__chop ()
 (
-	local _b;
-
 	cd -- "$DESTDIR";
 
 	export \
@@ -192,7 +196,7 @@ pkg__install ()
 	test "$p" = "$PKG_VERSION" ||
 		\die "build pkg version does not match PKG_VERSION: '$p <> $PKG_VERSION'";
 
-	trap 'eval "\__trap ; exit $?"' 1 2 3 6 9 15 EXIT;
+	trap 'eval "\__trap ; exit $?"' 1 2 3 6 15 EXIT;
 
 	\__cd_gitdir;
 
@@ -274,29 +278,30 @@ pkg__main ()
 	src_install		() { return 0 ; };
 	src_prepare		() { return 0 ; };
 
-	DESTDIR=;
-	DISTDIR=;
-	DISTDIR_DESC=;
-	KEYDIR=;
-	KEY_DESC=;
-	KEY_NAME=;
-	PKG_NAME=;
-	PKG_VERSION=;
-	STOW_DIR=;
-	STOW_TARGET=;
-	arePacked=0;
-	currentBranch=null;
-	currentId=;
-	isInitialized=false;
-	isPacked=false;
-	isStowed=false;
-	myContext=;
-	myHostname=;
-	myIds=;
-	myPkgAction=;
-	myUser=;
-	myXstowConfig=;
-	stowedIs=null;
+	# shellcheck disable=SC1007 disable=SC2034
+	DESTDIR= \
+	DISTDIR= \
+	DISTDIR_DESC= \
+	KEYDIR= \
+	KEY_DESC= \
+	KEY_NAME= \
+	PKG_NAME= \
+	PKG_VERSION= \
+	STOW_DIR= \
+	STOW_TARGET= \
+	arePacked=0 \
+	currentBranch=null \
+	currentId= \
+	isInitialized=false \
+	isPacked=false \
+	isStowed=false \
+	myContext= \
+	myHostname= \
+	myIds= \
+	myPkgAction= \
+	myUser= \
+	myXstowConfig= \
+	stowedIs=null \
 	useIds=;
 
 	\import git pkg;

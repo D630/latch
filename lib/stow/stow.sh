@@ -1,5 +1,7 @@
 #!/bin/sh
 
+# shellcheck disable=SC2154
+
 slimit ()
 {
 	local _l;
@@ -8,7 +10,7 @@ slimit ()
 	case $isInitialized::$isPacked::$isStowed in
 		(false::*|true::false::*)
 			: ;;
-		true::true::false)
+		(true::true::false)
 			if
 				test "$stowedIs" = null;
 			then
@@ -17,7 +19,7 @@ slimit ()
 				_l=delete;
 			fi;;
 		(true::true::true)
-			_l=delete;
+			_l=delete;;
 	esac;
 
 	if

@@ -1,7 +1,10 @@
 #!/bin/sh
 
+# shellcheck disable=SC2154
+
 __plimit ()
 {
+	# shellcheck disable=SC2015
 	test "$arePacked" -gt 1 &&
 		_l="$_l chop" ||
 		:;

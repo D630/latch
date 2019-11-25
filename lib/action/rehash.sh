@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# shellcheck disable=SC2209
+# shellcheck disable=SC2154
+# shellcheck disable=SC2164
+
 rehash__main ()
 (
 	test "$(idu)" -eq 0 &&

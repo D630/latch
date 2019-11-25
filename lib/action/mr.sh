@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# shellcheck disable=SC2154
+# shellcheck disable=SC2164
+# shellcheck disable=SC2209
+
 mr__main ()
 (
 	test "$(idu)" -eq 0 &&
@@ -44,6 +48,7 @@ mr__main ()
 	command mkdir -p "$myLog/mr";
 	command rm -f -- "$myLog/mr/"?*.log;
 
+	# shellcheck disable=SC2016
 	command "$bin" \
 		-f "$myMirrorList" \
 		-f "$myRoot/lib/awk/common.awk" \

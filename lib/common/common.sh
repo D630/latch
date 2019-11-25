@@ -1,7 +1,13 @@
 #!/bin/sh
 
+# shellcheck disable=SC2164
+# shellcheck disable=SC2030
+# shellcheck disable=SC2031
+# shellcheck disable=SC2154
+
 act ()
 {
+	# shellcheck source=/dev/null
 	. "$myRoot/lib/action/$1.sh" &&
 		"${1}__main";
 }
@@ -11,6 +17,7 @@ context ()
 	if
 		test -e "$myRoot/etc/context/$1.sh";
 	then
+		# shellcheck source=/dev/null
 		. "$myRoot/etc/context/$1.sh";
 	else
 		\die "context file does not exist: '$myRoot/etc/context/$1.sh'";
@@ -63,6 +70,7 @@ env ()
 		currentId \
 		myHostname;
 
+	# shellcheck source=/dev/null
 	. "$myRoot/etc/env/$myHostname.sh";
 	\msg "myUser := $myUser";
 	\msg "myIds := $myIds";
@@ -93,6 +101,7 @@ import ()
 		__i \
 		_i;
 
+	# shellcheck source=/dev/null
 	for _i in "$@";
 	do
 		if
@@ -110,6 +119,7 @@ import ()
 
 let ()
 {
+	# shellcheck disable=SC2016
 	IFS=, command eval test '$(($*))' -ne 0;
 }
 

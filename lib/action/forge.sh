@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# shellcheck disable=SC2154
+# shellcheck disable=SC2164
+
 forge__add ()
 {
 	_fadd ()
@@ -8,7 +11,6 @@ forge__add ()
 	}
 
 	local \
-		_r \
 		u \
 		b \
 		c;
@@ -104,11 +106,9 @@ forge__commit ()
 	fi
 }
 
-forge__remove () {
-
-	local  \
-		_r \
-		b=;
+forge__remove ()
+{
+	local b;
 	b=${1%/};
 	b=${b#/};
 
@@ -134,17 +134,19 @@ forge__remove () {
 }
 
 forge__ring ()
-if
-	\gcheck isGit;
-then
-	\die "latchkey ring already hammered";
-else
-	\msg "hammering latchkey ring ...";
-	\ginit "hammer latchkey ring";
-	\msg "forging latchkey ring ...";
-	printf '%s' "" > ./LINFO;
-	\gcommit "forge latchkey ring; after initialization";
-fi
+{
+	if
+		\gcheck isGit;
+	then
+		\die "latchkey ring already hammered";
+	else
+		\msg "hammering latchkey ring ...";
+		\ginit "hammer latchkey ring";
+		\msg "forging latchkey ring ...";
+		printf '%s' "" > ./LINFO;
+		\gcommit "forge latchkey ring; after initialization";
+	fi;
+}
 
 forge__main ()
 (
@@ -168,11 +170,10 @@ forge__main ()
 
 	case $c in
 		({})
-			\die "unknown argument: '$c'";
-		;;
-		()
-			"forge__$c" "$@";
-	esac
+			\die "unknown argument: '$c'";;
+		(*)
+			"forge__$c" "$@";;
+	esac;
 )
 
 # vim: set ft=sh :
